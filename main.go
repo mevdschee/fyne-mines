@@ -455,10 +455,10 @@ func main() {
 	mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
 	w.SetMainMenu(mainMenu)
 	container := g.movie.GetContainer()
-	w.SetContent(container)
 	w.SetPadded(false)
-	w.SetFixedSize(true)
+	w.SetContent(container)
 	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
+	w.SetFixedSize(true)
 	//go runGame()
 	w.ShowAndRun()
 }
