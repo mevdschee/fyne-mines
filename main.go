@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"log"
 	"math/rand"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/dialog"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/movies"
 	"github.com/mevdschee/fyne-mines/sprites"
@@ -438,30 +440,32 @@ func main() {
 	g.update()
 	// Main Menu (causes blank screen)
 	//Beginner (8x8, 10 mines), Intermediate (16x16, 40 mines) and Expert (24x24, 99 mines)
-	//menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
-	//menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
-	//menuItemExpert := fyne.NewMenuItem("Expert", func() {})
-	//menuFile := fyne.NewMenu("File ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
-	//menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
-	////menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {})
-	//menuItemZoom2x := fyne.NewMenuItem("1:2 pixels", func() {})
-	//menuItemZoom4x := fyne.NewMenuItem("1:4 pixels", func() {})
-	//menuItemZoom6x := fyne.NewMenuItem("1:6 pixels", func() {})
-	////menuItemZoom8x := fyne.NewMenuItem("1:8 pixels", func() {})
-	//menuItemZoom.ChildMenu = fyne.NewMenu("" /*menuItemZoom1x,*/, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x /*, menuItemZoom8x*/)
-	//menuView := fyne.NewMenu("View ", menuItemZoom)
-	//menuItemAbout := fyne.NewMenuItem("About...", func() {
-	//	dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
-	//})
-	//menuHelp := fyne.NewMenu("Help ", menuItemAbout)
-	//mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
-	//w.SetMainMenu(mainMenu)
+	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
+	menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
+	menuItemExpert := fyne.NewMenuItem("Expert", func() {})
+	menuFile := fyne.NewMenu("File ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
+	menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
+	//menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {})
+	menuItemZoom2x := fyne.NewMenuItem("1:2 pixels", func() {})
+	menuItemZoom4x := fyne.NewMenuItem("1:4 pixels", func() {})
+	menuItemZoom6x := fyne.NewMenuItem("1:6 pixels", func() {})
+	//menuItemZoom8x := fyne.NewMenuItem("1:8 pixels", func() {})
+	menuItemZoom.ChildMenu = fyne.NewMenu("" /*menuItemZoom1x,*/, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x /*, menuItemZoom8x*/)
+	menuView := fyne.NewMenu("View ", menuItemZoom)
+	menuItemAbout := fyne.NewMenuItem("About...", func() {
+		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
+	})
+	menuHelp := fyne.NewMenu("Help ", menuItemAbout)
+	mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
+	w.SetMainMenu(mainMenu)
 	w.SetPadded(false)
 	c := g.movie.GetContainer()
+	width, height := g.getSize()
+	i := canvas.NewImageFromImage(image.NewRGBA(image.Rect(0, 0, width, height)))
+	i.SetMinSize(fyne.NewSize(float32(width), float32(height)))
+	c.Add(i)
 	w.SetContent(c)
 	w.SetFixedSize(true)
-	width, height := g.getSize()
-	w.Resize(fyne.NewSize(float32(width), float32(height)))
 	go func() {
 		for range time.Tick(time.Second) {
 			g.update()
