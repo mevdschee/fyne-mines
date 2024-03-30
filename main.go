@@ -423,7 +423,7 @@ func main() {
 	a.SetIcon(resourceMinesiconPng)
 	w := a.NewWindow("Fyne Mines")
 	g := newGame(config{
-		scale:   2,
+		scale:   1,
 		width:   8,
 		height:  8,
 		bombs:   10,
@@ -455,10 +455,10 @@ func main() {
 	mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
 	w.SetMainMenu(mainMenu)
 	container := g.movie.GetContainer()
-	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
 	w.SetContent(container)
 	w.SetPadded(false)
 	w.SetFixedSize(true)
+	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
 	//go runGame()
 	w.ShowAndRun()
 }
