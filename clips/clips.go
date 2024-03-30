@@ -3,15 +3,39 @@ package clips
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 	"github.com/mevdschee/fyne-mines/sprites"
 	"golang.org/x/image/draw"
 )
 
 type InputHandlerFunc func(id int)
+
+type ImageButton struct {
+	*canvas.Image
+	OnTapped          func()
+	OnTappedSecondary func()
+}
+
+func NewImageButton(image *canvas.Image, onTapped func(), onTappedSecondary func()) *ImageButton {
+	return &ImageButton{image, onTapped, onTappedSecondary}
+}
+
+func (b *ImageButton) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(b.Image)
+}
+
+func (b *ImageButton) Tapped(ev *fyne.PointEvent) {
+	b.OnTapped()
+}
+
+func (b *ImageButton) TappedSecondary(ev *fyne.PointEvent) {
+	b.OnTappedSecondary()
+}
 
 // Clip is a set of frames
 type Clip struct {
@@ -21,7 +45,7 @@ type Clip struct {
 	width, height    int
 	scale            int
 	frame            int
-	frames           []*canvas.Image
+	frames           []*ImageButton
 	onPress          InputHandlerFunc
 	onLongPress      InputHandlerFunc
 	onRelease        InputHandlerFunc
@@ -71,7 +95,7 @@ func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
 
 // New creates a new sprite based clip
 func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
-	frames := []*canvas.Image{}
+	frames := []*ImageButton{}
 
 	srcWidth, srcHeight := sprite.Width, sprite.Height
 	for i := 0; i < sprite.Count; i++ {
@@ -86,7 +110,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		dstRect := image.Rect(0, 0, srcWidth*scale, srcHeight*scale)
 		dst := image.NewRGBA(dstRect)
 		draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
-		frame := canvas.NewImageFromImage(dst)
+		frame := NewImageButton(canvas.NewImageFromImage(dst), func() { log.Println("left-click") }, func() { log.Println("right-click") })
 		frames = append(frames, frame)
 	}
 
@@ -144,7 +168,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		srcY += srcHeight + sprite.Gap
 		dstY += dstHeight
 	}
-	frame0 := canvas.NewImageFromImage(dst)
+	frame0 := NewImageButton(canvas.NewImageFromImage(dst), func() { log.Println("left-click") }, func() { log.Println("right-click") })
 	clip := &Clip{
 		container: container.NewMax(),
 		name:      name,
@@ -154,7 +178,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		height:    height,
 		scale:     scale,
 		frame:     0,
-		frames:    []*canvas.Image{frame0},
+		frames:    []*ImageButton{frame0},
 	}
 	clip.container.Add(frame0)
 	return clip

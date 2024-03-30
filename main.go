@@ -458,7 +458,7 @@ func main() {
 	w.SetContent(container)
 	w.SetPadded(false)
 	w.SetFixedSize(true)
-
+	log.Println("right click！", time.Now(), "absolute:")
 	//go runGame()
 	w.ShowAndRun()
 }
