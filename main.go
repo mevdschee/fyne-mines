@@ -457,8 +457,8 @@ func main() {
 	container := g.movie.GetContainer()
 	w.SetPadded(false)
 	w.SetContent(container)
-	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
 	w.SetFixedSize(true)
+	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
 	//go runGame()
 	w.ShowAndRun()
 }
