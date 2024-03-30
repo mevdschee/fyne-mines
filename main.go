@@ -433,7 +433,7 @@ func main() {
 	menuItemZoom4x := fyne.NewMenuItem("1:4 pixels", func() {})
 	menuItemZoom6x := fyne.NewMenuItem("1:6 pixels", func() {})
 	//menuItemZoom8x := fyne.NewMenuItem("1:8 pixels", func() {})
-	menuItemZoom.ChildMenu = fyne.NewMenu("" /*menuItemZoom1x,*/, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x /*,menuItemZoom8x*/)
+	menuItemZoom.ChildMenu = fyne.NewMenu("" /*menuItemZoom1x,*/, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x /*, menuItemZoom8x*/)
 	menuView := fyne.NewMenu("View ", menuItemZoom)
 	menuItemAbout := fyne.NewMenuItem("About...", func() {
 		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
