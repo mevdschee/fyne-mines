@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/dialog"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/movies"
 	"github.com/mevdschee/fyne-mines/sprites"
@@ -357,11 +356,8 @@ func (g *game) setTiles() {
 	}
 }
 
-func (g *game) Update() error {
-	if g.movie == nil {
-		g.init()
-		g.setHandlers()
-	}
+func (g *game) update() error {
+	log.Println("tick")
 	if g.state == stateWaiting {
 		g.time = time.Now().UnixNano()
 	}
@@ -423,42 +419,45 @@ func main() {
 	a.SetIcon(resourceMinesiconPng)
 	w := a.NewWindow("Fyne Mines")
 	g := newGame(config{
-		scale:   2,
-		width:   8,
-		height:  8,
-		bombs:   10,
+		scale:   1,
+		width:   24,
+		height:  24,
+		bombs:   99,
 		holding: 15,
 	})
 	g.restart()
 	g.init()
 	g.setHandlers()
-	width, height := g.getSize()
-
-	// Main Menu
+	// Main Menu (causes blank screen)
 	//Beginner (8x8, 10 mines), Intermediate (16x16, 40 mines) and Expert (24x24, 99 mines)
-	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
-	menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
-	menuItemExpert := fyne.NewMenuItem("Expert", func() {})
-	menuFile := fyne.NewMenu("File ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
-	menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
-	//menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {})
-	menuItemZoom2x := fyne.NewMenuItem("1:2 pixels", func() {})
-	menuItemZoom4x := fyne.NewMenuItem("1:4 pixels", func() {})
-	menuItemZoom6x := fyne.NewMenuItem("1:6 pixels", func() {})
-	//menuItemZoom8x := fyne.NewMenuItem("1:8 pixels", func() {})
-	menuItemZoom.ChildMenu = fyne.NewMenu("" /*menuItemZoom1x,*/, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x /*, menuItemZoom8x*/)
-	menuView := fyne.NewMenu("View ", menuItemZoom)
-	menuItemAbout := fyne.NewMenuItem("About...", func() {
-		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
-	})
-	menuHelp := fyne.NewMenu("Help ", menuItemAbout)
-	mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
+	//menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
+	//menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
+	//menuItemExpert := fyne.NewMenuItem("Expert", func() {})
+	//menuFile := fyne.NewMenu("File ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
+	//menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
+	////menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {})
+	//menuItemZoom2x := fyne.NewMenuItem("1:2 pixels", func() {})
+	//menuItemZoom4x := fyne.NewMenuItem("1:4 pixels", func() {})
+	//menuItemZoom6x := fyne.NewMenuItem("1:6 pixels", func() {})
+	////menuItemZoom8x := fyne.NewMenuItem("1:8 pixels", func() {})
+	//menuItemZoom.ChildMenu = fyne.NewMenu("" /*menuItemZoom1x,*/, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x /*, menuItemZoom8x*/)
+	//menuView := fyne.NewMenu("View ", menuItemZoom)
+	//menuItemAbout := fyne.NewMenuItem("About...", func() {
+	//	dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
+	//})
+	//menuHelp := fyne.NewMenu("Help ", menuItemAbout)
+	//mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
+	//w.SetMainMenu(mainMenu)
 	w.SetPadded(false)
-	w.SetMainMenu(mainMenu)
-	container := g.movie.GetContainer()
-	w.SetContent(container)
+	c := g.movie.GetContainer()
+	w.SetContent(c)
 	w.SetFixedSize(true)
-	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
-	//go runGame()
+	width, height := g.getSize()
+	w.Resize(fyne.NewSize(float32(width), float32(height)))
+	go func() {
+		for range time.Tick(time.Second) {
+			g.update()
+		}
+	}()
 	w.ShowAndRun()
 }
