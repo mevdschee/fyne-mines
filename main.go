@@ -411,6 +411,8 @@ func (g *game) placeBombs(x, y, bombs int) {
 }
 
 func main() {
+	a := app.NewWithID("com.tqdev.fyne-mines")
+	w := a.NewWindow("Fyne Mines")
 	rand.Seed(time.Now().UnixNano())
 	g := newGame(config{
 		scale:   2,
@@ -423,8 +425,6 @@ func main() {
 	g.init()
 	width, height := g.getSize()
 
-	a := app.NewWithID("com.tqdev.fyne-mines")
-	w := a.NewWindow("Fyne Mines")
 	// Main Menu
 	menuFile := fyne.NewMenu("File ")
 	menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
