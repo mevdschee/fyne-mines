@@ -15,37 +15,37 @@ import (
 
 type InputHandlerFunc func(id int)
 
-type ImageButton struct {
-	*canvas.Image
+type InteractiveContainer struct {
+	*fyne.Container
 	OnTapped          func()
 	OnTappedSecondary func()
 }
 
-func NewImageButton(image *canvas.Image, onTapped func(), onTappedSecondary func()) *ImageButton {
-	return &ImageButton{image, onTapped, onTappedSecondary}
+func NewInteractiveContainer(container *fyne.Container, onTapped func(), onTappedSecondary func()) *InteractiveContainer {
+	return &InteractiveContainer{container, onTapped, onTappedSecondary}
 }
 
-func (b *ImageButton) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(b.Image)
+func (c *InteractiveContainer) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(c.Container)
 }
 
-func (b *ImageButton) Tapped(ev *fyne.PointEvent) {
-	b.OnTapped()
+func (c *InteractiveContainer) Tapped(ev *fyne.PointEvent) {
+	c.OnTapped()
 }
 
-func (b *ImageButton) TappedSecondary(ev *fyne.PointEvent) {
-	b.OnTappedSecondary()
+func (c *InteractiveContainer) TappedSecondary(ev *fyne.PointEvent) {
+	c.OnTappedSecondary()
 }
 
 // Clip is a set of frames
 type Clip struct {
-	container        *fyne.Container
+	container        *InteractiveContainer
 	name             string
 	x, y             int
 	width, height    int
 	scale            int
 	frame            int
-	frames           []*ImageButton
+	frames           []*canvas.Image
 	onPress          InputHandlerFunc
 	onLongPress      InputHandlerFunc
 	onRelease        InputHandlerFunc
@@ -67,13 +67,13 @@ func (c *Clip) GetName() string {
 }
 
 // GetContainer gets the container from the clip
-func (c *Clip) GetContainer() *fyne.Container {
+func (c *Clip) GetContainer() *InteractiveContainer {
 	return c.container
 }
 
 // GetPosition gets the position of the clip
 func (c *Clip) GetPosition() fyne.Position {
-	return fyne.Position{X: float32(c.x * c.scale), Y: float32(c.y * c.scale)}
+	return fyne.Position{X: float32(c.x * c.scale / 2), Y: float32(c.y * c.scale / 2)}
 }
 
 // GetSize gets the size of the clip
@@ -95,7 +95,7 @@ func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
 
 // New creates a new sprite based clip
 func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
-	frames := []*ImageButton{}
+	frames := []*canvas.Image{}
 
 	srcWidth, srcHeight := sprite.Width, sprite.Height
 	for i := 0; i < sprite.Count; i++ {
@@ -110,12 +110,12 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		dstRect := image.Rect(0, 0, srcWidth*scale, srcHeight*scale)
 		dst := image.NewRGBA(dstRect)
 		draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
-		frame := NewImageButton(canvas.NewImageFromImage(dst), func() { log.Println("left-click") }, func() { log.Println("right-click") })
+		frame := canvas.NewImageFromImage(dst)
 		frames = append(frames, frame)
 	}
 
 	clip := &Clip{
-		container: container.NewMax(),
+		container: NewInteractiveContainer(container.NewMax(), func() { log.Println("left-click") }, func() { log.Println("right-click") }),
 		name:      name,
 		x:         x,
 		y:         y,
@@ -168,9 +168,9 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		srcY += srcHeight + sprite.Gap
 		dstY += dstHeight
 	}
-	frame0 := NewImageButton(canvas.NewImageFromImage(dst), func() { log.Println("left-click") }, func() { log.Println("right-click") })
+	frame0 := canvas.NewImageFromImage(dst)
 	clip := &Clip{
-		container: container.NewMax(),
+		container: NewInteractiveContainer(container.NewMax(), func() { log.Println("left-click") }, func() { log.Println("right-click") }),
 		name:      name,
 		x:         x,
 		y:         y,
@@ -178,7 +178,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		height:    height,
 		scale:     scale,
 		frame:     0,
-		frames:    []*ImageButton{frame0},
+		frames:    []*canvas.Image{frame0},
 	}
 	clip.container.Add(frame0)
 	return clip
