@@ -412,6 +412,7 @@ func (g *game) placeBombs(x, y, bombs int) {
 
 func main() {
 	a := app.NewWithID("com.tqdev.fyne-mines")
+	a.SetIcon(resourceMinesiconPng)
 	w := a.NewWindow("Fyne Mines")
 	rand.Seed(time.Now().UnixNano())
 	g := newGame(config{
@@ -450,7 +451,6 @@ func main() {
 	w.SetContent(container)
 	w.SetPadded(false)
 	w.SetFixedSize(true)
-	w.SetIcon(resourceMinesiconPng)
 
 	//go runGame()
 	w.ShowAndRun()
