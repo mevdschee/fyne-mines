@@ -171,8 +171,16 @@ func (c *Clip) Draw(screen *canvas.Image) {
 
 // GotoFrame goes to a frame of the clip
 func (c *Clip) GotoFrame(frame int) {
-	if frame >= 0 && frame < len(c.frames) {
+	if c.frame != frame && frame >= 0 && frame < len(c.frames) {
 		c.frame = frame
+		for i := 0; i < len(c.frames); i++ {
+			if i == frame {
+				c.frames[i].Show()
+			} else {
+				c.frames[i].Hide()
+			}
+		}
+		c.container.Refresh()
 	}
 }
 
@@ -180,7 +188,7 @@ func (c *Clip) GotoFrame(frame int) {
 func (c *Clip) OnPress(handler func()) {
 	c.onPress = handler
 	for i := 0; i < len(c.frames); i++ {
-		c.frames[i].OnTapped = handler
+		c.frames[i].OnMouseDown = handler
 	}
 }
 
@@ -192,6 +200,9 @@ func (c *Clip) OnLongPress(handler func()) {
 // OnRelease sets the click handler function
 func (c *Clip) OnRelease(handler func()) {
 	c.onRelease = handler
+	for i := 0; i < len(c.frames); i++ {
+		c.frames[i].OnMouseUp = handler
+	}
 }
 
 // OnReleaseOutside sets the click handler function

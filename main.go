@@ -133,15 +133,18 @@ func (g *game) setHandlers() {
 	button := g.getClips("button")[0]
 	button.OnPress(func() {
 		g.button = buttonPressed
+		g.update()
 	})
 	button.OnRelease(func() {
 		if g.button == buttonPressed {
 			g.restart()
+			g.update()
 		}
 	})
 	button.OnReleaseOutside(func() {
 		if g.button == buttonPressed {
 			g.restart()
+			g.update()
 		}
 	})
 	icons := g.getClips("icons")
@@ -164,6 +167,7 @@ func (g *game) setHandlers() {
 						}
 					})
 				}
+				g.update()
 			})
 			icons[y*g.c.width+x].OnLongPress(func() {
 				if g.state == stateWon || g.state == stateLost {
@@ -171,6 +175,7 @@ func (g *game) setHandlers() {
 				}
 				g.onPressTile(px, py, true)
 				g.tiles[py][px].pressed = false
+				g.update()
 			})
 			icons[y*g.c.width+x].OnRelease(func() {
 				if g.state == stateWon || g.state == stateLost {
@@ -181,6 +186,7 @@ func (g *game) setHandlers() {
 					g.onPressTile(px, py, false)
 				}
 				g.tiles[py][px].pressed = false
+				g.update()
 			})
 			icons[y*g.c.width+x].OnReleaseOutside(func() {
 				if g.state == stateWon || g.state == stateLost {
@@ -188,6 +194,7 @@ func (g *game) setHandlers() {
 				}
 				g.button = buttonPlaying
 				g.tiles[py][px].pressed = false
+				g.update()
 			})
 		}
 	}
@@ -425,9 +432,10 @@ func main() {
 		bombs:   99,
 		holding: 15,
 	})
-	g.restart()
 	g.init()
 	g.setHandlers()
+	g.restart()
+	g.update()
 	// Main Menu (causes blank screen)
 	//Beginner (8x8, 10 mines), Intermediate (16x16, 40 mines) and Expert (24x24, 99 mines)
 	//menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
