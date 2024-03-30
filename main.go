@@ -423,7 +423,7 @@ func main() {
 	a.SetIcon(resourceMinesiconPng)
 	w := a.NewWindow("Fyne Mines")
 	g := newGame(config{
-		scale:   1,
+		scale:   2,
 		width:   8,
 		height:  8,
 		bombs:   10,
