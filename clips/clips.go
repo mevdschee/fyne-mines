@@ -3,53 +3,28 @@ package clips
 import (
 	"fmt"
 	"image"
-	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	"github.com/mevdschee/fyne-mines/interactive"
 	"github.com/mevdschee/fyne-mines/sprites"
 	"golang.org/x/image/draw"
 )
 
-type InputHandlerFunc func(id int)
-
-type InteractiveContainer struct {
-	*fyne.Container
-	OnTapped          func()
-	OnTappedSecondary func()
-}
-
-func NewInteractiveContainer(container *fyne.Container, onTapped func(), onTappedSecondary func()) *InteractiveContainer {
-	return &InteractiveContainer{container, onTapped, onTappedSecondary}
-}
-
-func (c *InteractiveContainer) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(c.Container)
-}
-
-func (c *InteractiveContainer) Tapped(ev *fyne.PointEvent) {
-	c.OnTapped()
-}
-
-func (c *InteractiveContainer) TappedSecondary(ev *fyne.PointEvent) {
-	c.OnTappedSecondary()
-}
-
 // Clip is a set of frames
 type Clip struct {
-	container        *InteractiveContainer
+	container        *fyne.Container
 	name             string
 	x, y             int
 	width, height    int
 	scale            int
 	frame            int
-	frames           []*canvas.Image
-	onPress          InputHandlerFunc
-	onLongPress      InputHandlerFunc
-	onRelease        InputHandlerFunc
-	onReleaseOutside InputHandlerFunc
+	frames           []*interactive.Image
+	onPress          func()
+	onLongPress      func()
+	onRelease        func()
+	onReleaseOutside func()
 }
 
 // ClipJSON is a clip in JSON
@@ -67,13 +42,13 @@ func (c *Clip) GetName() string {
 }
 
 // GetContainer gets the container from the clip
-func (c *Clip) GetContainer() *InteractiveContainer {
+func (c *Clip) GetContainer() *fyne.Container {
 	return c.container
 }
 
 // GetPosition gets the position of the clip
 func (c *Clip) GetPosition() fyne.Position {
-	return fyne.Position{X: float32(c.x * c.scale / 2), Y: float32(c.y * c.scale / 2)}
+	return fyne.Position{X: float32(c.x * c.scale), Y: float32(c.y * c.scale)}
 }
 
 // GetSize gets the size of the clip
@@ -95,7 +70,7 @@ func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
 
 // New creates a new sprite based clip
 func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
-	frames := []*canvas.Image{}
+	frames := []*interactive.Image{}
 
 	srcWidth, srcHeight := sprite.Width, sprite.Height
 	for i := 0; i < sprite.Count; i++ {
@@ -110,12 +85,12 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		dstRect := image.Rect(0, 0, srcWidth*scale, srcHeight*scale)
 		dst := image.NewRGBA(dstRect)
 		draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
-		frame := canvas.NewImageFromImage(dst)
+		frame := interactive.NewImage(canvas.NewImageFromImage(dst), fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
 		frames = append(frames, frame)
 	}
 
 	clip := &Clip{
-		container: NewInteractiveContainer(container.NewMax(), func() { log.Println("left-click") }, func() { log.Println("right-click") }),
+		container: container.NewMax(),
 		name:      name,
 		x:         x,
 		y:         y,
@@ -168,9 +143,9 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		srcY += srcHeight + sprite.Gap
 		dstY += dstHeight
 	}
-	frame0 := canvas.NewImageFromImage(dst)
+	frame0 := interactive.NewImage(canvas.NewImageFromImage(dst), fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
 	clip := &Clip{
-		container: NewInteractiveContainer(container.NewMax(), func() { log.Println("left-click") }, func() { log.Println("right-click") }),
+		container: container.NewMax(),
 		name:      name,
 		x:         x,
 		y:         y,
@@ -178,7 +153,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		height:    height,
 		scale:     scale,
 		frame:     0,
-		frames:    []*canvas.Image{frame0},
+		frames:    []*interactive.Image{frame0},
 	}
 	clip.container.Add(frame0)
 	return clip
@@ -202,22 +177,25 @@ func (c *Clip) GotoFrame(frame int) {
 }
 
 // OnPress sets the click handler function
-func (c *Clip) OnPress(handler InputHandlerFunc) {
+func (c *Clip) OnPress(handler func()) {
 	c.onPress = handler
+	for i := 0; i < len(c.frames); i++ {
+		c.frames[i].OnTapped = handler
+	}
 }
 
 // OnLongPress sets the click handler function
-func (c *Clip) OnLongPress(handler InputHandlerFunc) {
+func (c *Clip) OnLongPress(handler func()) {
 	c.onLongPress = handler
 }
 
 // OnRelease sets the click handler function
-func (c *Clip) OnRelease(handler InputHandlerFunc) {
+func (c *Clip) OnRelease(handler func()) {
 	c.onRelease = handler
 }
 
 // OnReleaseOutside sets the click handler function
-func (c *Clip) OnReleaseOutside(handler InputHandlerFunc) {
+func (c *Clip) OnReleaseOutside(handler func()) {
 	c.onReleaseOutside = handler
 }
 
