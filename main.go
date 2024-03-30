@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"image"
 	"log"
 	"math/rand"
 	"time"
@@ -10,39 +8,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/movies"
 	"github.com/mevdschee/fyne-mines/sprites"
-	"golang.org/x/image/draw"
 )
-
-var spriteMapImage = `
-	iVBORw0KGgoAAAANSUhEUgAAAJAAAAB6BAMAAACit8dvAAAAMFBMVEUAAACAAAAAgACAgAAAAICA
-	AIAAgIDAwMCAgID/AAAA/wD//wAAAP//AP8A//////9PEyZJAAAEtklEQVRo3u2YO2/bSBCARxVB
-	s+FVAVymSeverYH8k6RlAiNLGQGcToqaUyfQTUoJacyef8H/R8A1unnsi7skQ4vM4QJ7JSw5D36a
-	3Z0dLgTrmRqslLSp198DeuLrW2x4XVbYSL69ub3B66e/sL1B+QM2lAvAlqBMA2uDvjLoM4HeadAu
-	Bn0JQCWBVi3QkwYpRSBSMujmvQaJ35cPbkgCUqoN+iogEqaB9NCI85avMke3N9je66EpNzT0K0AN
-	zBFx3vWBzBx9HANijjc0pXhoJAtIKQ3CkQ0M7TNzpoBwsp+6ll+D4qHRyLqWvwukApByCWlAHXP0
-	P9xrk0AnacewvozV/9TNgMrwF0L990paqHcgkdc+KCGQp080KCVQ4D8GtNyRviJ5ufNAAONACZaZ
-	BEHLikHLHcoVRpQCpCmCiqRI2L+gzB4AUcWiiCoBqQoBOwRtUV/5IMDPEAhOVPlsRCr9AVWCINKn
-	PEfPBOk5UlCl2zbIztEgCLglJ5n09YqeRvm76NMTByT+xfAcSVG3IEUgjgh0RBYEahxIL7MdmgFZ
-	/1+AzKrRg6RfbqFS3qq5iEbmkQGZ5Td5NHpowRbBtUtU1blFWiCzjUOQ1QdbJPS3oLIDRC3Um91f
-	9oF+ztSAwq0uIMd2Ifd9mrgXHw3aomb7kC8WC3jI5Z77LWvYeim91ns9P3WpQTSD6cMC4djLPfcV
-	a8i6uJBe672enlqYiCjPqoc8D3vRU59fSh/qxTO/bIEWEPbuAYyI+1Avni8iIioOzG73le0xIjAR
-	+fq0HZHkS0ceud7kkcssk0es1yDJzvF5HOs7IvIzOI7OjyiPI6qCeTFzEc9XfN+7av7qxCsY3/fm
-	kZ8vcU7F9y8mIq8e+XXHr1Chj61cfj2KcsTkkZfrvXnkV8jxNbtPM/dbxD/6rg6+dDfWJKC/T66V
-	B084bgZMraN3BDqufe9yM2BaK9dKDTo6DXo7+3ozYPrtoIKOVtabDmwW1G3qARVZ04D1hqapEwPq
-	MQlIsB4InZsm0d4FCbUB9ZgYpLEOxHZ0EG9+FJ9lUJ+JQAbrQGJvEvYumqtr/NYCyuq6wa8xaayA
-	DNYHQVNn1htQzgyoQXfPhC3TIIu1INQwqGbvTCJqEgIVjUSkTTUAfsnEoJojaIGErUF6oAJqmTIC
-	ZZmAMgFhtM8GQXOFj17XBmSmthdUQ09E7jd6QDX5Ou+r+tqBaFJGgsKlaUjuXrWaf1BpEKGyNoh/
-	1oIoIptHHKw14eo3dvk1tj+zaY5+ndkWO3mvxZl95u6P99q59Sja/WdXyHY9Kr33wcH/c2YzYOqo
-	kCv/xXLwH90MmDpAvn2994XNWNPMr2x55T0+8uWu67/zu7tng46bbxC3f54fUYkgOqnggY5OPnKY
-	Hw3iZNnvJT++8dkpp6MYdSycB+LTHBACchDhzIjofEkYIBQL50aECHycJghE+KMjwr19WM0REYHu
-	p0bUFifmUbna708S0fmZPW9E97jXZsmjkwW9ZvZ/GtFc9WhaHrlNO61me5t2wltEQHqv3Z/idtZe
-	m/Km5Yj2eotMAM0b0epxekTtMjIR5MrIVJDN7FfQHwLik+5B/h6aApID/QygcibQv7SdAex29G+U
-	AAAAAElFTkSuQmCC`
 
 const spriteMapMeta = `
 	[{"name":"display","x":28,"y":82,"width":41,"height":25,"count":1},
@@ -136,7 +106,7 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *game) init() {
-	spriteMap, err := sprites.NewSpriteMap(spriteMapImage, spriteMapMeta)
+	spriteMap, err := sprites.NewSpriteMap(resourceWinxpskinPng.Content(), spriteMapMeta)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -473,42 +443,14 @@ func main() {
 	mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
 	w.SetMainMenu(mainMenu)
 
-	//game := setupGame()
 	container := g.movie.GetContainer()
 	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
 	w.SetContent(container)
 	//w.Canvas().SetOnTypedKey(keyTyped)
 	w.SetPadded(false)
 	w.SetFixedSize(true)
+	w.SetIcon(resourceMinesiconPng)
 
 	//go runGame()
 	w.ShowAndRun()
-}
-
-func setupGame() *fyne.Container {
-	// var segments []fyne.CanvasObject
-	// for i := 0; i < 10; i++ {
-	// 	seg := snakePart{9, float32(5 + i)}
-	// 	snakeParts = append(snakeParts, seg)
-
-	// 	r := canvas.NewImageFromResource(resourceBallPng)
-	// 	if i == 0 {
-	// 		r = canvas.NewImageFromResource(resourceHeadPng)
-	// 	}
-	// 	//r := canvas.NewRectangle(&color.RGBA{G: 0x66, A: 0xff})
-	// 	r.Resize(fyne.NewSize(float32(size), float32(size)))
-	// 	r.Move(fyne.NewPos(90, float32(50+i*size)))
-	// 	segments = append(segments, r)
-	// }
-	ball, _, _ := image.Decode(bytes.NewReader(resourceBallPng.Content()))
-	src := image.NewRGBA(image.Rect(0, 0, 140, 140))
-	dst := image.NewRGBA(image.Rect(0, 0, 280, 280))
-	draw.Over.Draw(src, src.Rect, ball, image.ZP)
-	draw.NearestNeighbor.Scale(dst, dst.Rect, src, src.Rect, draw.Over, nil)
-	img := canvas.NewImageFromImage(dst)
-	img.SetMinSize(fyne.NewSize(float32(dst.Bounds().Dx()), float32(dst.Bounds().Dy())))
-	img.ScaleMode = canvas.ImageScalePixels
-	img.FillMode = canvas.ImageFillContain
-	//img.FillMode = canvas.ImageFillContain
-	return container.NewGridWithColumns(1, img)
 }

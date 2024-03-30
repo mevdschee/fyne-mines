@@ -2,11 +2,9 @@ package sprites
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"image"
 	"image/png"
-	"strings"
 )
 
 // SpriteMap is a map of sprites
@@ -27,24 +25,9 @@ type Sprite struct {
 	Gap     int          `json:"gap,omitempty"`
 }
 
-func loadImageFromString(b64 string) (*image.Image, error) {
-	b64 = strings.ReplaceAll(b64, "\n", "")
-	b64 = strings.ReplaceAll(b64, "\t", "")
-	b64 = strings.ReplaceAll(b64, " ", "")
-	bin, err := base64.StdEncoding.DecodeString(b64)
-	if err != nil {
-		return nil, err
-	}
-	img, err := png.Decode(bytes.NewReader(bin))
-	if err != nil {
-		return nil, err
-	}
-	return &img, err
-}
-
 // NewSpriteMap creates a new sprite map
-func NewSpriteMap(base64image, jsondata string) (SpriteMap, error) {
-	image, err := loadImageFromString(base64image)
+func NewSpriteMap(imageData []byte, jsondata string) (SpriteMap, error) {
+	image, err := png.Decode(bytes.NewReader(imageData))
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +38,7 @@ func NewSpriteMap(base64image, jsondata string) (SpriteMap, error) {
 		return nil, err
 	}
 	for _, sprite := range sprites {
-		sprite.Image = image
+		sprite.Image = &image
 		spriteMap[sprite.Name] = sprite
 	}
 	return spriteMap, nil
