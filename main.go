@@ -219,14 +219,21 @@ func (g *game) onPressTile(x, y int, long bool) {
 	if !long && g.tiles[y][x].marked {
 		return
 	}
-	g.state = statePlaying
 	if g.tiles[y][x].open {
 		if long {
+			var marked = 0
 			g.forEachNeighbour(x, y, func(x, y int) {
-				if !g.tiles[y][x].marked {
-					g.onPressTile(x, y, false)
+				if g.tiles[y][x].marked {
+					marked++
 				}
 			})
+			if g.tiles[y][x].number == marked {
+				g.forEachNeighbour(x, y, func(x, y int) {
+					if !g.tiles[y][x].marked {
+						g.onPressTile(x, y, false)
+					}
+				})
+			}
 		}
 	} else {
 		if long {
@@ -395,10 +402,11 @@ func (g *game) restart() {
 }
 
 func (g *game) placeBombs(x, y, bombs int) {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := bombs
 	g.tiles[y][x].bomb = true
 	for b > 0 {
-		x, y := rand.Intn(g.c.width), rand.Intn(g.c.height)
+		x, y := rng.Intn(g.c.width), rng.Intn(g.c.height)
 		if !g.tiles[y][x].bomb {
 			g.tiles[y][x].bomb = true
 			b--
@@ -414,9 +422,8 @@ func main() {
 	a := app.NewWithID("com.tqdev.fyne-mines")
 	a.SetIcon(resourceMinesiconPng)
 	w := a.NewWindow("Fyne Mines")
-	rand.Seed(time.Now().UnixNano())
 	g := newGame(config{
-		scale:   2,
+		scale:   3,
 		width:   8,
 		height:  8,
 		bombs:   10,
