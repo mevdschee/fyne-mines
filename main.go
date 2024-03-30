@@ -426,7 +426,11 @@ func main() {
 	width, height := g.getSize()
 
 	// Main Menu
-	menuFile := fyne.NewMenu("File ")
+	//Beginner (8x8, 10 mines), Intermediate (16x16, 40 mines) and Expert (24x24, 99 mines)
+	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
+	menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
+	menuItemExpert := fyne.NewMenuItem("Expert", func() {})
+	menuFile := fyne.NewMenu("File ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
 	menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
 	//menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {})
 	menuItemZoom2x := fyne.NewMenuItem("1:2 pixels", func() {})
@@ -439,14 +443,11 @@ func main() {
 		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
 	})
 	menuHelp := fyne.NewMenu("Help ", menuItemAbout)
-
 	mainMenu := fyne.NewMainMenu(menuFile, menuView, menuHelp)
 	w.SetMainMenu(mainMenu)
-
 	container := g.movie.GetContainer()
 	w.Resize(fyne.NewSize(float32(width), float32(height+26)))
 	w.SetContent(container)
-	//w.Canvas().SetOnTypedKey(keyTyped)
 	w.SetPadded(false)
 	w.SetFixedSize(true)
 	w.SetIcon(resourceMinesiconPng)
