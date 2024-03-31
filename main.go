@@ -1,7 +1,6 @@
 package main
 
 import (
-	"image"
 	"log"
 	"math/rand"
 	"time"
@@ -120,6 +119,8 @@ func (g *game) init() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	width, height := g.getSize()
+	movie.SetSize(width, height)
 	g.movie = movie
 }
 
@@ -459,12 +460,7 @@ func main() {
 	mainMenu := fyne.NewMainMenu(menuGame, menuView, menuHelp)
 	w.SetMainMenu(mainMenu)
 	w.SetPadded(false)
-	c := g.movie.GetContainer()
-	width, height := g.getSize()
-	i := canvas.NewImageFromImage(image.NewRGBA(image.Rect(0, 0, width, height)))
-	i.SetMinSize(fyne.NewSize(float32(width), float32(height)))
-	c.Add(i)
-	w.SetContent(c)
+	w.SetContent(g.movie.GetContainer())
 	w.SetFixedSize(true)
 	go func() {
 		for range time.Tick(time.Second) {

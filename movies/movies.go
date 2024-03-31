@@ -3,6 +3,7 @@ package movies
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -55,6 +56,14 @@ func (m *Movie) GetContainer() *fyne.Container {
 	return m.container
 }
 
+// SetSize set the size of the movie
+func (m *Movie) SetSize(width, height int) {
+	c := m.GetContainer()
+	i := canvas.NewImageFromImage(image.NewRGBA(image.Rect(0, 0, width, height)))
+	i.SetMinSize(fyne.NewSize(float32(width), float32(height)))
+	c.Add(i)
+}
+
 // Add adds a scene to the movie
 func (m *Movie) Add(scene *scenes.Scene) {
 	m.scenes[scene.GetName()] = scene
@@ -76,6 +85,7 @@ func (m *Movie) Update() (err error) {
 	if m.currentScene != nil {
 		err = m.currentScene.Update()
 	}
+	m.container.Refresh()
 	return err
 }
 

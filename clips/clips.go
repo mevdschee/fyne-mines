@@ -180,7 +180,6 @@ func (c *Clip) GotoFrame(frame int) {
 				c.frames[i].Hide()
 			}
 		}
-		c.container.Refresh()
 	}
 }
 
