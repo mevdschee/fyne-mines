@@ -395,11 +395,6 @@ func (g *game) updateTile(x, y int) {
 	icons[y*g.c.width+x].GotoFrame(icon, true)
 }
 
-func newGame(c config) *game {
-	g := &game{c: c}
-	return g
-}
-
 func (g *game) restart() {
 	g.button = buttonPlaying
 	g.updateButton()
@@ -437,7 +432,7 @@ func (g *game) placeBombs(x, y, bombs int) {
 }
 
 func NewGame(config config, window fyne.Window) *game {
-	g := newGame(config)
+	g := &game{c: config}
 	g.init()
 	g.setHandlers()
 	g.restart()
