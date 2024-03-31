@@ -430,8 +430,8 @@ func main() {
 	w := a.NewWindow("Fyne Mines")
 	g := newGame(config{
 		scale:   1,
-		width:   24,
-		height:  24,
+		width:   30,
+		height:  16,
 		bombs:   99,
 		holding: 15,
 	})
@@ -440,7 +440,7 @@ func main() {
 	g.restart()
 	g.update()
 	// Main Menu (causes blank screen)
-	//Beginner (8x8, 10 mines), Intermediate (16x16, 40 mines) and Expert (24x24, 99 mines)
+	//Beginner (9x9), Intermediate (16x16), Expert (30x16).
 	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
 	menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
 	menuItemExpert := fyne.NewMenuItem("Expert", func() {})
