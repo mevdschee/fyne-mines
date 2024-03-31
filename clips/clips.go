@@ -173,12 +173,22 @@ func (c *Clip) Draw(screen *canvas.Image) {
 func (c *Clip) GotoFrame(frame int) {
 	if c.frame != frame && frame >= 0 && frame < len(c.frames) {
 		c.frame = frame
+		dirty := false
 		for i := 0; i < len(c.frames); i++ {
 			if i == frame {
-				c.frames[i].Show()
+				if !c.frames[i].Visible() {
+					c.frames[i].Show()
+					dirty = true
+				}
 			} else {
-				c.frames[i].Hide()
+				if c.frames[i].Visible() {
+					c.frames[i].Hide()
+					dirty = true
+				}
 			}
+		}
+		if dirty {
+			c.container.Refresh()
 		}
 	}
 }

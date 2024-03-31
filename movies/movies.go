@@ -85,7 +85,6 @@ func (m *Movie) Update() (err error) {
 	if m.currentScene != nil {
 		err = m.currentScene.Update()
 	}
-	m.container.Refresh()
 	return err
 }
 
