@@ -73,21 +73,6 @@ func (m *Movie) Add(scene *scenes.Scene) {
 	m.container.Add(scene.GetContainer())
 }
 
-// Draw draws the movie
-func (m *Movie) Draw(screen *canvas.Image) {
-	if m.currentScene != nil {
-		m.currentScene.Draw(screen)
-	}
-}
-
-// Update updates the movie
-func (m *Movie) Update() (err error) {
-	if m.currentScene != nil {
-		err = m.currentScene.Update()
-	}
-	return err
-}
-
 // GetClip gets a clip from the movie
 func (m *Movie) GetClip(scene, layer, clip string) (*clips.Clip, error) {
 	return m.getClip(scene, layer, clip, 0)

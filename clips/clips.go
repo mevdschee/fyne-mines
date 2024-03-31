@@ -159,16 +159,6 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 	return clip
 }
 
-// Draw draws the clip
-func (c *Clip) Draw(screen *canvas.Image) {
-	//img := c.frames[c.frame]
-	//srcWidth, srcHeight := img.Size()
-	//op := &canvas.DrawImageOptions{}
-	//op.GeoM.Scale(float64(c.width)/float64(srcWidth), float64(c.height)/float64(srcHeight))
-	//op.GeoM.Translate(float64(c.x), float64(c.y))
-	//screen.DrawImage(img, op)
-}
-
 // GotoFrame goes to a frame of the clip
 func (c *Clip) GotoFrame(frame int) {
 	if c.frame != frame && frame >= 0 && frame < len(c.frames) {
@@ -217,39 +207,4 @@ func (c *Clip) OnRelease(handler func()) {
 // OnReleaseOutside sets the click handler function
 func (c *Clip) OnReleaseOutside(handler func()) {
 	c.onReleaseOutside = handler
-}
-
-// IsHovered returns whether or not the cursor is hovering the clip
-func (c *Clip) IsHovered() bool {
-	//cursorX, cursorY := canvas.CursorPosition()
-	//cursor := image.Point{cursorX, cursorY}
-	//rect := image.Rect(c.x, c.y, c.x+c.width, c.y+c.height)
-	//return cursor.In(rect)
-	return true
-}
-
-// Update updates the clip
-func (c *Clip) Update() (err error) {
-	// hover := c.IsHovered()
-	// if c.onPress != nil {
-	// 	if hover && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-	// 		c.onPress(-1)
-	// 	}
-	// }
-	// if c.onLongPress != nil {
-	// 	if hover && inpututil.MouseButtonPressDuration(ebiten.MouseButtonLeft) == ebiten.MaxTPS()/2 {
-	// 		c.onLongPress(-1)
-	// 	}
-	// }
-	// if c.onRelease != nil {
-	// 	if hover && inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-	// 		c.onRelease(-1)
-	// 	}
-	// }
-	// if c.onReleaseOutside != nil {
-	// 	if !hover && inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-	// 		c.onReleaseOutside(-1)
-	// 	}
-	// }
-	return nil
 }

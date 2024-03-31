@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"github.com/expr-lang/expr"
 	"github.com/mevdschee/fyne-mines/clips"
@@ -113,24 +112,6 @@ func (l *Layer) Add(clip *clips.Clip) {
 	container.Resize(clip.GetSize())
 	container.Move(clip.GetPosition())
 	l.container.Add(container)
-}
-
-// Draw draws the layer
-func (l *Layer) Draw(screen *canvas.Image) {
-	for _, clip := range l.clips {
-		clip.Draw(screen)
-	}
-}
-
-// Update updates the layer
-func (l *Layer) Update() (err error) {
-	for _, clip := range l.clips {
-		err = clip.Update()
-		if err != nil {
-			break
-		}
-	}
-	return err
 }
 
 // GetClip gets a clip from the layer

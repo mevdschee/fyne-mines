@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/dialog"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/movies"
@@ -366,7 +365,7 @@ func (g *game) setTiles() {
 	}
 }
 
-func (g *game) update() error {
+func (g *game) update() {
 	log.Println("tick")
 	if g.state == stateWaiting {
 		g.time = time.Now().UnixNano()
@@ -380,11 +379,6 @@ func (g *game) update() error {
 			g.button = buttonWon
 		}
 	}
-	return g.movie.Update()
-}
-
-func (g *game) Draw(screen *canvas.Image) {
-	g.movie.Draw(screen)
 }
 
 func newGame(c config) *game {

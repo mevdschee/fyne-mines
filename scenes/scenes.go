@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/layers"
@@ -74,24 +73,6 @@ func (s *Scene) Add(layer *layers.Layer) {
 	s.layers[name] = layer
 	s.order = append(s.order, name)
 	s.container.Add(layer.GetContainer())
-}
-
-// Draw draws the scene
-func (s *Scene) Draw(screen *canvas.Image) {
-	for _, name := range s.order {
-		s.layers[name].Draw(screen)
-	}
-}
-
-// Update updates the scene
-func (s *Scene) Update() (err error) {
-	for _, name := range s.order {
-		err = s.layers[name].Update()
-		if err != nil {
-			break
-		}
-	}
-	return err
 }
 
 // GetClip gets a clip from the scene
