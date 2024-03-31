@@ -7,7 +7,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/dialog"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/movies"
 	"github.com/mevdschee/fyne-mines/sprites"
@@ -135,18 +134,16 @@ func (g *game) setHandlers() {
 	button := g.getClips("button")[0]
 	button.OnPress(func() {
 		g.button = buttonPressed
-		g.update()
+		g.updateButton()
 	})
 	button.OnRelease(func() {
 		if g.button == buttonPressed {
 			g.restart()
-			g.update()
 		}
 	})
 	button.OnReleaseOutside(func() {
 		if g.button == buttonPressed {
 			g.restart()
-			g.update()
 		}
 	})
 	icons := g.getClips("icons")
@@ -158,18 +155,20 @@ func (g *game) setHandlers() {
 					return
 				}
 				g.button = buttonEvaluate
+				g.updateButton()
 				if g.tiles[py][px].marked {
 					return
 				}
 				g.tiles[py][px].pressed = true
+				g.updateTile(px, py)
 				if g.tiles[py][px].open {
 					g.forEachNeighbour(px, py, func(x, y int) {
 						if !g.tiles[y][x].marked {
 							g.tiles[y][x].pressed = true
+							g.updateTile(x, y)
 						}
 					})
 				}
-				g.update()
 			})
 			icons[y*g.c.width+x].OnLongPress(func() {
 				if g.state == stateWon || g.state == stateLost {
@@ -177,26 +176,28 @@ func (g *game) setHandlers() {
 				}
 				g.onPressTile(px, py, true)
 				g.tiles[py][px].pressed = false
-				g.update()
+				g.updateAllTiles()
 			})
 			icons[y*g.c.width+x].OnRelease(func() {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
 				g.button = buttonPlaying
+				g.updateButton()
 				if g.tiles[py][px].pressed {
 					g.onPressTile(px, py, false)
 				}
 				g.tiles[py][px].pressed = false
-				g.update()
+				g.updateAllTiles()
 			})
 			icons[y*g.c.width+x].OnReleaseOutside(func() {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
 				g.button = buttonPlaying
+				g.updateButton()
 				g.tiles[py][px].pressed = false
-				g.update()
+				g.updateTile(px, py)
 			})
 		}
 	}
@@ -222,6 +223,7 @@ func (g *game) onPressTile(x, y int, long bool) {
 	if g.state == stateWaiting {
 		g.state = statePlaying
 		g.time = time.Now().UnixNano()
+		g.updateTimeDigits()
 		g.placeBombs(x, y, g.bombs)
 	}
 	if !long && g.tiles[y][x].marked {
@@ -248,9 +250,11 @@ func (g *game) onPressTile(x, y int, long bool) {
 			if g.tiles[y][x].marked {
 				g.tiles[y][x].marked = false
 				g.bombs++
+				g.updateBombDigits()
 			} else {
 				g.tiles[y][x].marked = true
 				g.bombs--
+				g.updateBombDigits()
 			}
 		} else {
 			g.tiles[y][x].open = true
@@ -258,6 +262,7 @@ func (g *game) onPressTile(x, y int, long bool) {
 			if g.tiles[y][x].bomb {
 				g.state = stateLost
 				g.button = buttonLost
+				g.updateButton()
 				return
 			}
 			if g.tiles[y][x].number == 0 {
@@ -269,12 +274,12 @@ func (g *game) onPressTile(x, y int, long bool) {
 	}
 }
 
-func (g *game) setButton() {
+func (g *game) updateButton() {
 	button := g.getClips("button")[0]
-	button.GotoFrame(g.button)
+	button.GotoFrame(g.button, true)
 }
 
-func (g *game) setNumbers() {
+func (g *game) updateBombDigits() {
 	bombsDigits := g.getClips("bombs")
 	bombs := g.bombs
 	if g.state == stateWon {
@@ -290,12 +295,15 @@ func (g *game) setNumbers() {
 	}
 	for i := 0; i < 3; i++ {
 		if i == 2 && negative {
-			bombsDigits[2-i].GotoFrame(10)
+			bombsDigits[2-i].GotoFrame(10, true)
 		} else {
-			bombsDigits[2-i].GotoFrame(bombs % 10)
+			bombsDigits[2-i].GotoFrame(bombs%10, true)
 		}
 		bombs /= 10
 	}
+}
+
+func (g *game) updateTimeDigits() {
 	if g.state == statePlaying || g.state == stateWaiting {
 		time := int((time.Now().UnixNano() - g.time) / 1000000000)
 		if time > 999 {
@@ -303,13 +311,13 @@ func (g *game) setNumbers() {
 		}
 		timeDigits := g.getClips("time")
 		for i := 0; i < 3; i++ {
-			timeDigits[2-i].GotoFrame(time % 10)
+			timeDigits[2-i].GotoFrame(time%10, true)
 			time /= 10
 		}
 	}
 }
 
-func (g *game) setTiles() {
+func (g *game) updateAllTiles() {
 	icons := g.getClips("icons")
 	if g.state == stateWon || g.state == stateLost {
 		for y := 0; y < g.c.height; y++ {
@@ -338,7 +346,7 @@ func (g *game) setTiles() {
 						}
 					}
 				}
-				icons[y*g.c.width+x].GotoFrame(icon)
+				icons[y*g.c.width+x].GotoFrame(icon, false)
 			}
 		}
 	} else {
@@ -359,26 +367,31 @@ func (g *game) setTiles() {
 						}
 					}
 				}
-				icons[y*g.c.width+x].GotoFrame(icon)
+				icons[y*g.c.width+x].GotoFrame(icon, false)
 			}
 		}
 	}
+	g.movie.GetContainer().Refresh()
 }
 
-func (g *game) update() {
-	log.Println("tick")
-	if g.state == stateWaiting {
-		g.time = time.Now().UnixNano()
-	}
-	g.setButton()
-	g.setNumbers()
-	g.setTiles()
-	if g.state == statePlaying {
-		if g.closed == g.c.bombs {
-			g.state = stateWon
-			g.button = buttonWon
+func (g *game) updateTile(x, y int) {
+	icons := g.getClips("icons")
+	icon := iconClosed
+	if g.tiles[y][x].open {
+		icon = g.tiles[y][x].number
+	} else {
+		if g.tiles[y][x].marked {
+			icon = iconMarked
+		} else {
+			if g.tiles[y][x].pressed {
+				icon = iconEmpty
+			}
+			if g.state == stateWon {
+				icon = iconMarked
+			}
 		}
 	}
+	icons[y*g.c.width+x].GotoFrame(icon, true)
 }
 
 func newGame(c config) *game {
@@ -388,10 +401,13 @@ func newGame(c config) *game {
 
 func (g *game) restart() {
 	g.button = buttonPlaying
+	g.updateButton()
 	g.bombs = g.c.bombs
+	g.updateBombDigits()
 	g.closed = g.c.width * g.c.height
 	g.state = stateWaiting
 	g.time = time.Now().UnixNano()
+	g.updateTimeDigits()
 	g.tiles = make([][]tile, g.c.height)
 	for y := 0; y < g.c.height; y++ {
 		g.tiles[y] = make([]tile, g.c.width)
@@ -399,6 +415,7 @@ func (g *game) restart() {
 			g.tiles[y][x] = tile{}
 		}
 	}
+	g.updateAllTiles()
 }
 
 func (g *game) placeBombs(x, y, bombs int) {
@@ -418,47 +435,71 @@ func (g *game) placeBombs(x, y, bombs int) {
 	g.tiles[y][x].bomb = false
 }
 
+func NewGame(config config, window fyne.Window) *game {
+	g := newGame(config)
+	g.init()
+	g.setHandlers()
+	g.restart()
+	window.SetContent(g.movie.GetContainer())
+	window.Resize(fyne.NewSize(0, 0))
+	return g
+}
+
 func main() {
 	a := app.NewWithID("com.tqdev.fyne-mines")
 	a.SetIcon(resourceMinesiconPng)
 	w := a.NewWindow("Fyne Mines")
-	g := newGame(config{
+	var g *game
+	c := config{
 		scale:   1,
 		width:   30,
 		height:  16,
 		bombs:   99,
 		holding: 15,
-	})
-	g.init()
-	g.setHandlers()
-	g.restart()
-	g.update()
+	}
 	// Main Menu (causes blank screen)
 	//Beginner (9x9), Intermediate (16x16), Expert (30x16).
-	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {})
-	menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {})
-	menuItemExpert := fyne.NewMenuItem("Expert", func() {})
-	menuGame := fyne.NewMenu("Game ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
-	menuItemZoom := fyne.NewMenuItem("Zoom ", func() {})
-	menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {})
-	menuItemZoom2x := fyne.NewMenuItem("1:2 pixels", func() {})
-	menuItemZoom4x := fyne.NewMenuItem("1:4 pixels", func() {})
-	menuItemZoom6x := fyne.NewMenuItem("1:6 pixels", func() {})
-	menuItemZoom8x := fyne.NewMenuItem("1:8 pixels", func() {})
-	menuItemZoom.ChildMenu = fyne.NewMenu("", menuItemZoom1x, menuItemZoom2x, menuItemZoom4x, menuItemZoom6x, menuItemZoom8x)
-	menuView := fyne.NewMenu("View ", menuItemZoom)
-	menuItemAbout := fyne.NewMenuItem("About...", func() {
-		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
+	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {
+		c.width = 9
+		c.height = 9
+		c.bombs = 10
+		g = NewGame(c, w)
 	})
-	menuHelp := fyne.NewMenu("Help ", menuItemAbout)
-	mainMenu := fyne.NewMainMenu(menuGame, menuView, menuHelp)
+	menuItemIntermediate := fyne.NewMenuItem("Intermediate", func() {
+		c.width = 16
+		c.height = 16
+		c.bombs = 40
+		g = NewGame(c, w)
+	})
+	menuItemExpert := fyne.NewMenuItem("Expert", func() {
+		c.width = 30
+		c.height = 16
+		c.bombs = 99
+		g = NewGame(c, w)
+	})
+	menuGame := fyne.NewMenu("Game ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
+	menuItemZoom := fyne.NewMenuItem("Zoom ", nil)
+	menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {
+		c.scale = 1
+		g = NewGame(c, w)
+	})
+	menuItemZoom2x := fyne.NewMenuItem("1:4 pixels", func() {
+		c.scale = 4
+		g = NewGame(c, w)
+	})
+	menuItemZoom.ChildMenu = fyne.NewMenu("", menuItemZoom1x, menuItemZoom2x)
+	menuView := fyne.NewMenu("View ", menuItemZoom)
+	mainMenu := fyne.NewMainMenu(menuGame, menuView)
 	w.SetMainMenu(mainMenu)
 	w.SetPadded(false)
+	menuItemBeginner.Action()
 	w.SetContent(g.movie.GetContainer())
 	w.SetFixedSize(true)
 	go func() {
-		for range time.Tick(time.Second) {
-			g.update()
+		for range time.Tick(time.Millisecond * 100) {
+			if g.state == statePlaying {
+				g.updateTimeDigits()
+			}
 		}
 	}()
 	w.ShowAndRun()

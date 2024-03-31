@@ -82,10 +82,12 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		srcY := sprite.Y + (i/grid)*(srcHeight+sprite.Gap)
 		srcRect := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
 		src, _ := cropImage(*sprite.Image, srcRect)
-		dstRect := image.Rect(0, 0, srcWidth*scale, srcHeight*scale)
+		dstRect := image.Rect(0, 0, srcWidth, srcHeight)
 		dst := image.NewRGBA(dstRect)
 		draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
-		frame := interactive.NewImage(canvas.NewImageFromImage(dst), fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
+		img := canvas.NewImageFromImage(dst)
+		img.ScaleMode = canvas.ImageScalePixels
+		frame := interactive.NewImage(img, fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
 		frames = append(frames, frame)
 	}
 
@@ -113,7 +115,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 
 // NewScaled creates a new 9 slice scaled sprite based clip
 func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale int) *Clip {
-	dst := image.NewRGBA(image.Rect(0, 0, width*scale, height*scale))
+	dst := image.NewRGBA(image.Rect(0, 0, width, height))
 
 	srcY := sprite.Y
 	dstY := 0
@@ -134,7 +136,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 
 			srcRect := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
 			src, _ := cropImage(*sprite.Image, srcRect)
-			dstRect := image.Rect(dstX*scale, dstY*scale, (dstX+dstWidth)*scale, (dstY+dstHeight)*scale)
+			dstRect := image.Rect(dstX, dstY, dstX+dstWidth, dstY+dstHeight)
 			draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
 
 			srcX += srcWidth + sprite.Gap
@@ -143,7 +145,9 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		srcY += srcHeight + sprite.Gap
 		dstY += dstHeight
 	}
-	frame0 := interactive.NewImage(canvas.NewImageFromImage(dst), fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
+	img := canvas.NewImageFromImage(dst)
+	img.ScaleMode = canvas.ImageScalePixels
+	frame0 := interactive.NewImage(img, fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
 	clip := &Clip{
 		container: container.NewMax(),
 		name:      name,
@@ -160,7 +164,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 }
 
 // GotoFrame goes to a frame of the clip
-func (c *Clip) GotoFrame(frame int) {
+func (c *Clip) GotoFrame(frame int, refresh bool) {
 	if c.frame != frame && frame >= 0 && frame < len(c.frames) {
 		c.frame = frame
 		dirty := false
@@ -177,7 +181,7 @@ func (c *Clip) GotoFrame(frame int) {
 				}
 			}
 		}
-		if dirty {
+		if dirty && refresh {
 			c.container.Refresh()
 		}
 	}
