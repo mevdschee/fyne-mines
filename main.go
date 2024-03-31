@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/dialog"
 	"github.com/mevdschee/fyne-mines/clips"
 	"github.com/mevdschee/fyne-mines/movies"
 	"github.com/mevdschee/fyne-mines/sprites"
@@ -451,10 +452,7 @@ func main() {
 	w := a.NewWindow("Fyne Mines")
 	var g *game
 	c := config{
-		scale:   1,
-		width:   30,
-		height:  16,
-		bombs:   99,
+		scale:   2,
 		holding: 15,
 	}
 	// Main Menu (causes blank screen)
@@ -478,18 +476,11 @@ func main() {
 		g = NewGame(c, w)
 	})
 	menuGame := fyne.NewMenu("Game ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
-	menuItemZoom := fyne.NewMenuItem("Zoom ", nil)
-	menuItemZoom1x := fyne.NewMenuItem("1:1 pixels", func() {
-		c.scale = 1
-		g = NewGame(c, w)
+	menuItemAbout := fyne.NewMenuItem("About...", func() {
+		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
 	})
-	menuItemZoom2x := fyne.NewMenuItem("1:4 pixels", func() {
-		c.scale = 4
-		g = NewGame(c, w)
-	})
-	menuItemZoom.ChildMenu = fyne.NewMenu("", menuItemZoom1x, menuItemZoom2x)
-	menuView := fyne.NewMenu("View ", menuItemZoom)
-	mainMenu := fyne.NewMainMenu(menuGame, menuView)
+	menuHelp := fyne.NewMenu("Help ", menuItemAbout)
+	mainMenu := fyne.NewMainMenu(menuGame, menuHelp)
 	w.SetMainMenu(mainMenu)
 	w.SetPadded(false)
 	menuItemBeginner.Action()
