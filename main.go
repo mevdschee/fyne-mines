@@ -455,8 +455,6 @@ func main() {
 		scale:   2,
 		holding: 15,
 	}
-	// Main Menu (causes blank screen)
-	//Beginner (9x9), Intermediate (16x16), Expert (30x16).
 	menuItemBeginner := fyne.NewMenuItem("Beginner", func() {
 		c.width = 9
 		c.height = 9
