@@ -3,10 +3,12 @@ package clips
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"github.com/mevdschee/fyne-mines/interactive"
 	"github.com/mevdschee/fyne-mines/sprites"
 	"golang.org/x/image/draw"
@@ -191,7 +193,18 @@ func (c *Clip) GotoFrame(frame int, refresh bool) {
 func (c *Clip) OnPress(handler func()) {
 	c.onPress = handler
 	for i := 0; i < len(c.frames); i++ {
-		c.frames[i].OnMouseDown = handler
+		c.frames[i].OnMouseDown(func(ev *desktop.MouseEvent) {
+			c.MouseDown(ev)
+		})
+	}
+}
+
+// MouseDown handles the mouse down event
+func (c *Clip) MouseDown(ev *desktop.MouseEvent) {
+	log.Println("mouse-down: " + c.name)
+	log.Printf("mouse-down: %v\n", ev)
+	if c.onPress != nil {
+		c.onPress()
 	}
 }
 
@@ -200,11 +213,25 @@ func (c *Clip) OnLongPress(handler func()) {
 	c.onLongPress = handler
 }
 
+// MouseUp handles the mouse up event
+func (c *Clip) MouseUp(ev *desktop.MouseEvent) {
+	log.Println("mouse-up: " + c.name)
+	log.Printf("mouse-up: %v\n", ev)
+	//if ev.Button = desktop.MouseButtonPrimary {} // left
+	//if ev.Button = desktop.MouseButtonSecondary {} // right
+	//if ev.Button = desktop.MouseButtonTertiary {} // middle
+	if c.onRelease != nil {
+		c.onRelease()
+	}
+}
+
 // OnRelease sets the click handler function
 func (c *Clip) OnRelease(handler func()) {
 	c.onRelease = handler
 	for i := 0; i < len(c.frames); i++ {
-		c.frames[i].OnMouseUp = handler
+		c.frames[i].OnMouseUp(func(ev *desktop.MouseEvent) {
+			c.MouseUp(ev)
+		})
 	}
 }
 
