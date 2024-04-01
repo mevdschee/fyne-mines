@@ -16,17 +16,19 @@ import (
 
 // Clip is a set of frames
 type Clip struct {
-	container        *fyne.Container
-	name             string
-	x, y             int
-	width, height    int
-	scale            int
-	frame            int
-	frames           []*interactive.Image
-	onPress          func()
-	onLongPress      func()
-	onRelease        func()
-	onReleaseOutside func()
+	container     *fyne.Container
+	name          string
+	x, y          int
+	width, height int
+	scale         int
+	overlay       *interactive.Image
+	frame         int
+	frames        []*canvas.Image
+	onPress       func(left, right, middle, alt, control bool)
+	onRelease     func(left, right, middle, alt, control bool)
+	onEnter       func(left, right, middle, alt, control bool)
+	onLeave       func()
+	onOver        func(left, right, middle, alt, control bool)
 }
 
 // ClipJSON is a clip in JSON
@@ -72,7 +74,7 @@ func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
 
 // New creates a new sprite based clip
 func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
-	frames := []*interactive.Image{}
+	frames := []*canvas.Image{}
 
 	srcWidth, srcHeight := sprite.Width, sprite.Height
 	for i := 0; i < sprite.Count; i++ {
@@ -87,9 +89,8 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		dstRect := image.Rect(0, 0, srcWidth, srcHeight)
 		dst := image.NewRGBA(dstRect)
 		draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
-		img := canvas.NewImageFromImage(dst)
-		img.ScaleMode = canvas.ImageScalePixels
-		frame := interactive.NewImage(img, fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
+		frame := canvas.NewImageFromImage(dst)
+		frame.ScaleMode = canvas.ImageScalePixels
 		frames = append(frames, frame)
 	}
 
@@ -101,6 +102,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		width:     srcWidth,
 		height:    srcHeight,
 		scale:     scale,
+		overlay:   interactive.NewImage(canvas.NewImageFromImage(image.NewRGBA(frames[0].Image.Bounds()))),
 		frame:     0,
 		frames:    frames,
 	}
@@ -112,6 +114,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		}
 		clip.container.Add(clip.frames[i])
 	}
+	clip.container.Add(clip.overlay)
 	return clip
 }
 
@@ -147,9 +150,8 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		srcY += srcHeight + sprite.Gap
 		dstY += dstHeight
 	}
-	img := canvas.NewImageFromImage(dst)
-	img.ScaleMode = canvas.ImageScalePixels
-	frame0 := interactive.NewImage(img, fmt.Sprintf("%s: (%v,%v) x%v", name, x, y, scale))
+	frame0 := canvas.NewImageFromImage(dst)
+	frame0.ScaleMode = canvas.ImageScalePixels
 	clip := &Clip{
 		container: container.NewMax(),
 		name:      name,
@@ -158,8 +160,9 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		width:     width,
 		height:    height,
 		scale:     scale,
+		overlay:   interactive.NewImage(canvas.NewImageFromImage(image.NewRGBA(frame0.Image.Bounds()))),
 		frame:     0,
-		frames:    []*interactive.Image{frame0},
+		frames:    []*canvas.Image{frame0},
 	}
 	clip.container.Add(frame0)
 	return clip
@@ -189,53 +192,87 @@ func (c *Clip) GotoFrame(frame int, refresh bool) {
 	}
 }
 
-// OnPress sets the click handler function
-func (c *Clip) OnPress(handler func()) {
+// OnPress sets the mouse down handler
+func (c *Clip) OnPress(handler func(left, right, middle, alt, control bool)) {
 	c.onPress = handler
-	for i := 0; i < len(c.frames); i++ {
-		c.frames[i].OnMouseDown(func(ev *desktop.MouseEvent) {
-			c.MouseDown(ev)
-		})
-	}
+	c.overlay.OnMouseDown(func(ev *desktop.MouseEvent) {
+		c.MouseDown(ev)
+	})
 }
 
 // MouseDown handles the mouse down event
 func (c *Clip) MouseDown(ev *desktop.MouseEvent) {
-	log.Println("mouse-down: " + c.name)
-	log.Printf("mouse-down: %v\n", ev)
+	log.Printf("mouse-down %v (%v,%v)", c.name, c.x, c.y)
 	if c.onPress != nil {
-		c.onPress()
+		c.onPress(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}
 }
 
-// OnLongPress sets the click handler function
-func (c *Clip) OnLongPress(handler func()) {
-	c.onLongPress = handler
+// OnRelease sets the mouse up handler
+func (c *Clip) OnRelease(handler func(left, right, middle, alt, control bool)) {
+	c.onRelease = handler
+	c.overlay.OnMouseUp(func(ev *desktop.MouseEvent) {
+		c.MouseUp(ev)
+	})
 }
 
 // MouseUp handles the mouse up event
 func (c *Clip) MouseUp(ev *desktop.MouseEvent) {
-	log.Println("mouse-up: " + c.name)
-	log.Printf("mouse-up: %v\n", ev)
+	log.Printf("mouse-up %v (%v,%v)", c.name, c.x, c.y)
 	//if ev.Button = desktop.MouseButtonPrimary {} // left
 	//if ev.Button = desktop.MouseButtonSecondary {} // right
 	//if ev.Button = desktop.MouseButtonTertiary {} // middle
 	if c.onRelease != nil {
-		c.onRelease()
+		c.onRelease(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}
 }
 
-// OnRelease sets the click handler function
-func (c *Clip) OnRelease(handler func()) {
-	c.onRelease = handler
-	for i := 0; i < len(c.frames); i++ {
-		c.frames[i].OnMouseUp(func(ev *desktop.MouseEvent) {
-			c.MouseUp(ev)
-		})
+// OnEnter sets the enter handler
+func (c *Clip) OnEnter(handler func(left, right, middle, alt, control bool)) {
+	c.onEnter = handler
+	c.overlay.OnMouseIn(func(ev *desktop.MouseEvent) {
+		c.MouseIn(ev)
+	})
+}
+
+// MouseUp handles the mouse up event
+func (c *Clip) MouseIn(ev *desktop.MouseEvent) {
+	//log.Printf("mouse-in %v (%v,%v)", c.name, c.x, c.y)
+	if c.onEnter != nil {
+		c.onEnter(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}
 }
 
-// OnReleaseOutside sets the click handler function
-func (c *Clip) OnReleaseOutside(handler func()) {
-	c.onReleaseOutside = handler
+// OnLeave sets the leave handler
+func (c *Clip) OnLeave(handler func()) {
+	c.onLeave = handler
+	c.overlay.OnMouseOut(func() {
+		c.MouseOut()
+	})
+}
+
+// MouseOut handles the mouse out event
+func (c *Clip) MouseOut() {
+	//log.Printf("mouse-out %v (%v,%v)", c.name, c.x, c.y)
+	//log.Printf("mouse-out: %v\n", ev)
+	if c.onLeave != nil {
+		c.onLeave()
+	}
+}
+
+// OnOver sets the mouse moved handler
+func (c *Clip) OnOver(handler func(left, right, middle, alt, control bool)) {
+	c.onOver = handler
+	c.overlay.OnMouseMoved(func(ev *desktop.MouseEvent) {
+		c.MouseMoved(ev)
+	})
+}
+
+// MouseMoved handles the mouse moved event
+func (c *Clip) MouseMoved(ev *desktop.MouseEvent) {
+	//log.Printf("mouse-moved %v (%v,%v)", c.name, c.x, c.y)
+	//log.Printf("mouse-moved: %v\n", ev)
+	if c.onOver != nil {
+		c.onOver(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
+	}
 }

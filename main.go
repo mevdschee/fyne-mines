@@ -133,16 +133,16 @@ func (g *game) getClips(clip string) []*clips.Clip {
 
 func (g *game) setHandlers() {
 	button := g.getClips("button")[0]
-	button.OnPress(func() {
+	button.OnPress(func(left, right, middle, alt, control bool) {
 		g.button = buttonPressed
 		g.updateButton()
 	})
-	button.OnRelease(func() {
+	button.OnRelease(func(left, right, middle, alt, control bool) {
 		if g.button == buttonPressed {
 			g.restart()
 		}
 	})
-	button.OnReleaseOutside(func() {
+	button.OnLeave(func() {
 		if g.button == buttonPressed {
 			g.restart()
 		}
@@ -151,7 +151,7 @@ func (g *game) setHandlers() {
 	for y := 0; y < g.c.height; y++ {
 		for x := 0; x < g.c.width; x++ {
 			px, py := x, y
-			icons[y*g.c.width+x].OnPress(func() {
+			icons[y*g.c.width+x].OnPress(func(left, right, middle, alt, control bool) {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
@@ -171,15 +171,7 @@ func (g *game) setHandlers() {
 					})
 				}
 			})
-			icons[y*g.c.width+x].OnLongPress(func() {
-				if g.state == stateWon || g.state == stateLost {
-					return
-				}
-				g.onPressTile(px, py, true)
-				g.tiles[py][px].pressed = false
-				g.updateAllTiles()
-			})
-			icons[y*g.c.width+x].OnRelease(func() {
+			icons[y*g.c.width+x].OnRelease(func(left, right, middle, alt, control bool) {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
@@ -191,12 +183,27 @@ func (g *game) setHandlers() {
 				g.tiles[py][px].pressed = false
 				g.updateAllTiles()
 			})
-			icons[y*g.c.width+x].OnReleaseOutside(func() {
+			icons[y*g.c.width+x].OnEnter(func(left, right, middle, alt, control bool) {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
-				g.button = buttonPlaying
-				g.updateButton()
+				log.Printf("OnEnter (%v,%v)", px, py)
+				if left {
+					g.tiles[py][px].pressed = true
+					g.updateTile(px, py)
+				}
+				//g.button = buttonPlaying
+				//g.updateButton()
+				//g.tiles[py][px].pressed = false
+				//g.updateTile(px, py)
+			})
+			icons[y*g.c.width+x].OnLeave(func() {
+				if g.state == stateWon || g.state == stateLost {
+					return
+				}
+				log.Printf("OnLeave (%v,%v)", px, py)
+				//g.button = buttonPlaying
+				//g.updateButton()
 				g.tiles[py][px].pressed = false
 				g.updateTile(px, py)
 			})
@@ -305,7 +312,7 @@ func (g *game) updateBombDigits() {
 }
 
 func (g *game) updateTimeDigits() {
-	if g.state == statePlaying || g.state == stateWaiting {
+	if g.state == statePlaying {
 		time := int((time.Now().UnixNano() - g.time) / 1000000000)
 		if time > 999 {
 			time = 999
@@ -481,9 +488,7 @@ func main() {
 	w.SetFixedSize(true)
 	go func() {
 		for range time.Tick(time.Millisecond * 100) {
-			if g.state == statePlaying {
-				g.updateTimeDigits()
-			}
+			g.updateTimeDigits()
 		}
 	}()
 	w.ShowAndRun()
