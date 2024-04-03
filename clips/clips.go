@@ -3,7 +3,6 @@ package clips
 import (
 	"fmt"
 	"image"
-	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -93,7 +92,9 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		frame.ScaleMode = canvas.ImageScalePixels
 		frames = append(frames, frame)
 	}
-
+	overlay := image.NewRGBA(frames[0].Image.Bounds())
+	//blue := color.RGBA{0, 0, 255, 200}
+	//draw.Draw(overlay, overlay.Bounds(), &image.Uniform{blue}, image.Point{0, 0}, draw.Src)
 	clip := &Clip{
 		container: container.NewMax(),
 		name:      name,
@@ -102,7 +103,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		width:     srcWidth,
 		height:    srcHeight,
 		scale:     scale,
-		overlay:   interactive.NewImage(canvas.NewImageFromImage(image.NewRGBA(frames[0].Image.Bounds()))),
+		overlay:   interactive.NewImage(canvas.NewImageFromImage(overlay)),
 		frame:     0,
 		frames:    frames,
 	}
@@ -152,6 +153,9 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 	}
 	frame0 := canvas.NewImageFromImage(dst)
 	frame0.ScaleMode = canvas.ImageScalePixels
+	overlay := image.NewRGBA(frame0.Image.Bounds())
+	//blue := color.RGBA{0, 0, 255, 200}
+	//draw.Draw(overlay, overlay.Bounds(), &image.Uniform{blue}, image.Point{0, 0}, draw.Src)
 	clip := &Clip{
 		container: container.NewMax(),
 		name:      name,
@@ -160,11 +164,12 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 		width:     width,
 		height:    height,
 		scale:     scale,
-		overlay:   interactive.NewImage(canvas.NewImageFromImage(image.NewRGBA(frame0.Image.Bounds()))),
+		overlay:   interactive.NewImage(canvas.NewImageFromImage(overlay)),
 		frame:     0,
 		frames:    []*canvas.Image{frame0},
 	}
 	clip.container.Add(frame0)
+	clip.container.Add(clip.overlay)
 	return clip
 }
 
@@ -202,7 +207,6 @@ func (c *Clip) OnPress(handler func(left, right, middle, alt, control bool)) {
 
 // MouseDown handles the mouse down event
 func (c *Clip) MouseDown(ev *desktop.MouseEvent) {
-	log.Printf("mouse-down %v (%v,%v)", c.name, c.x, c.y)
 	if c.onPress != nil {
 		c.onPress(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}
@@ -218,10 +222,6 @@ func (c *Clip) OnRelease(handler func(left, right, middle, alt, control bool)) {
 
 // MouseUp handles the mouse up event
 func (c *Clip) MouseUp(ev *desktop.MouseEvent) {
-	log.Printf("mouse-up %v (%v,%v)", c.name, c.x, c.y)
-	//if ev.Button = desktop.MouseButtonPrimary {} // left
-	//if ev.Button = desktop.MouseButtonSecondary {} // right
-	//if ev.Button = desktop.MouseButtonTertiary {} // middle
 	if c.onRelease != nil {
 		c.onRelease(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}
@@ -237,7 +237,6 @@ func (c *Clip) OnEnter(handler func(left, right, middle, alt, control bool)) {
 
 // MouseUp handles the mouse up event
 func (c *Clip) MouseIn(ev *desktop.MouseEvent) {
-	//log.Printf("mouse-in %v (%v,%v)", c.name, c.x, c.y)
 	if c.onEnter != nil {
 		c.onEnter(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}
@@ -253,8 +252,6 @@ func (c *Clip) OnLeave(handler func()) {
 
 // MouseOut handles the mouse out event
 func (c *Clip) MouseOut() {
-	//log.Printf("mouse-out %v (%v,%v)", c.name, c.x, c.y)
-	//log.Printf("mouse-out: %v\n", ev)
 	if c.onLeave != nil {
 		c.onLeave()
 	}
@@ -270,8 +267,6 @@ func (c *Clip) OnOver(handler func(left, right, middle, alt, control bool)) {
 
 // MouseMoved handles the mouse moved event
 func (c *Clip) MouseMoved(ev *desktop.MouseEvent) {
-	//log.Printf("mouse-moved %v (%v,%v)", c.name, c.x, c.y)
-	//log.Printf("mouse-moved: %v\n", ev)
 	if c.onOver != nil {
 		c.onOver(ev.Button&desktop.MouseButtonPrimary > 0, ev.Button&desktop.MouseButtonSecondary > 0, ev.Button&desktop.MouseButtonTertiary > 0, false, false)
 	}

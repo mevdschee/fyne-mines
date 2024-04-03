@@ -177,11 +177,20 @@ func (g *game) setHandlers() {
 				}
 				g.button = buttonPlaying
 				g.updateButton()
-				if g.tiles[py][px].pressed {
-					g.onPressTile(px, py, false)
+				if g.tiles[py][px].open {
+					g.forEachNeighbour(px, py, func(x, y int) {
+						if !g.tiles[y][x].marked {
+							g.tiles[y][x].pressed = false
+							g.updateTile(x, y)
+						}
+					})
+				} else {
+					if g.tiles[py][px].pressed {
+						g.onPressTile(px, py, false)
+					}
+					g.tiles[py][px].pressed = false
+					g.updateAllTiles()
 				}
-				g.tiles[py][px].pressed = false
-				g.updateAllTiles()
 			})
 			icons[y*g.c.width+x].OnEnter(func(left, right, middle, alt, control bool) {
 				if g.state == stateWon || g.state == stateLost {
@@ -205,6 +214,14 @@ func (g *game) setHandlers() {
 				//g.button = buttonPlaying
 				//g.updateButton()
 				g.tiles[py][px].pressed = false
+				if g.tiles[py][px].open {
+					g.forEachNeighbour(px, py, func(x, y int) {
+						if !g.tiles[y][x].marked {
+							g.tiles[y][x].pressed = false
+							g.updateTile(x, y)
+						}
+					})
+				}
 				g.updateTile(px, py)
 			})
 		}
