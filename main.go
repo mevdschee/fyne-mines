@@ -155,27 +155,33 @@ func (g *game) setHandlers() {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
-				if g.tiles[py][px].marked {
-					return
+				if !right {
+					if !g.tiles[py][px].marked {
+						g.button = buttonEvaluate
+						g.updateButton()
+						g.tiles[py][px].pressed = true
+						g.updateTile(px, py)
+						if g.tiles[py][px].open {
+							g.forEachNeighbour(px, py, func(x, y int) {
+								if !g.tiles[y][x].marked {
+									g.tiles[y][x].pressed = true
+									g.updateTile(x, y)
+								}
+							})
+						}
+					}
 				}
 				if right {
 					if !g.tiles[py][px].open {
-						g.tiles[py][px].marked = true
+						if g.tiles[py][px].marked {
+							g.tiles[py][px].marked = false
+							g.bombs++
+						} else {
+							g.tiles[py][px].marked = true
+							g.bombs--
+						}
+						g.updateBombDigits()
 						g.updateTile(px, py)
-					}
-				}
-				if left {
-					g.button = buttonEvaluate
-					g.updateButton()
-					g.tiles[py][px].pressed = true
-					g.updateTile(px, py)
-					if g.tiles[py][px].open {
-						g.forEachNeighbour(px, py, func(x, y int) {
-							if !g.tiles[y][x].marked {
-								g.tiles[y][x].pressed = true
-								g.updateTile(x, y)
-							}
-						})
 					}
 				}
 			})
@@ -185,19 +191,36 @@ func (g *game) setHandlers() {
 				}
 				g.button = buttonPlaying
 				g.updateButton()
-				if g.tiles[py][px].open {
-					g.forEachNeighbour(px, py, func(x, y int) {
-						if !g.tiles[y][x].marked {
-							g.tiles[y][x].pressed = false
-							g.updateTile(x, y)
+				if !right {
+					if !g.tiles[py][px].open {
+						if g.tiles[py][px].pressed {
+							g.tiles[py][px].pressed = false
+							g.onPressTile(px, py)
+							g.updateAllTiles()
 						}
-					})
-				} else {
-					if g.tiles[py][px].pressed {
-						g.onPressTile(px, py, false)
+					} else {
+						var marks = 0
+						g.forEachNeighbour(px, py, func(x, y int) {
+							if g.tiles[y][x].marked {
+								marks++
+							}
+						})
+						if g.tiles[py][px].number == marks {
+							g.forEachNeighbour(px, py, func(x, y int) {
+								if !g.tiles[y][x].open && !g.tiles[y][x].marked {
+									g.onPressTile(x, y)
+								}
+							})
+							g.updateAllTiles()
+						} else {
+							g.forEachNeighbour(px, py, func(x, y int) {
+								if !g.tiles[y][x].marked {
+									g.tiles[y][x].pressed = false
+									g.updateTile(x, y)
+								}
+							})
+						}
 					}
-					g.tiles[py][px].pressed = false
-					g.updateAllTiles()
 				}
 			})
 			icons[y*g.c.width+x].OnEnter(func(left, right, middle, alt, control bool) {
@@ -219,10 +242,6 @@ func (g *game) setHandlers() {
 						})
 					}
 				}
-				//g.button = buttonPlaying
-				//g.updateButton()
-				//g.tiles[py][px].pressed = false
-				//g.updateTile(px, py)
 			})
 			icons[y*g.c.width+x].OnLeave(func() {
 				if g.state == stateWon || g.state == stateLost {
@@ -230,9 +249,6 @@ func (g *game) setHandlers() {
 				}
 				g.button = buttonPlaying
 				g.updateButton()
-				log.Printf("OnLeave (%v,%v)", px, py)
-				//g.button = buttonPlaying
-				//g.updateButton()
 				g.tiles[py][px].pressed = false
 				if g.tiles[py][px].open {
 					g.forEachNeighbour(px, py, func(x, y int) {
@@ -264,57 +280,34 @@ func (g *game) forEachNeighbour(x, y int, do func(x, y int)) {
 	}
 }
 
-func (g *game) onPressTile(x, y int, long bool) {
+func (g *game) onPressTile(x, y int) {
 	if g.state == stateWaiting {
 		g.state = statePlaying
 		g.time = time.Now().UnixNano()
 		g.updateTimeDigits()
 		g.placeBombs(x, y, g.bombs)
 	}
-	if !long && g.tiles[y][x].marked {
-		return
-	}
-	if g.tiles[y][x].open {
-		if long {
-			var marked = 0
-			g.forEachNeighbour(x, y, func(x, y int) {
-				if g.tiles[y][x].marked {
-					marked++
+	if !g.tiles[y][x].open {
+		g.tiles[y][x].open = true
+		g.closed--
+		if g.tiles[y][x].bomb {
+			g.state = stateLost
+			g.button = buttonLost
+			g.updateButton()
+			return
+		}
+		if g.closed == g.c.bombs {
+			g.state = stateWon
+			g.button = buttonWon
+			g.updateButton()
+			return
+		}
+		if g.tiles[y][x].number == 0 {
+			g.forEachNeighbour(x, y, func(px, py int) {
+				if !g.tiles[y][x].marked {
+					g.onPressTile(px, py)
 				}
 			})
-			if g.tiles[y][x].number == marked {
-				g.forEachNeighbour(x, y, func(x, y int) {
-					if !g.tiles[y][x].marked {
-						g.onPressTile(x, y, false)
-					}
-				})
-			}
-		}
-	} else {
-		if long {
-			if g.tiles[y][x].marked {
-				g.tiles[y][x].marked = false
-				g.bombs++
-				g.updateBombDigits()
-			} else {
-				g.tiles[y][x].marked = true
-				g.bombs--
-				g.updateBombDigits()
-			}
-		} else {
-			g.tiles[y][x].open = true
-			g.closed--
-			if g.tiles[y][x].bomb {
-				g.state = stateLost
-				g.button = buttonLost
-				g.updateButton()
-				return
-			}
-			if g.tiles[y][x].number == 0 {
-				g.forEachNeighbour(x, y, func(x, y int) {
-					g.onPressTile(x, y, false)
-				})
-			}
 		}
 	}
 }
