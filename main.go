@@ -155,20 +155,28 @@ func (g *game) setHandlers() {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
-				g.button = buttonEvaluate
-				g.updateButton()
 				if g.tiles[py][px].marked {
 					return
 				}
-				g.tiles[py][px].pressed = true
-				g.updateTile(px, py)
-				if g.tiles[py][px].open {
-					g.forEachNeighbour(px, py, func(x, y int) {
-						if !g.tiles[y][x].marked {
-							g.tiles[y][x].pressed = true
-							g.updateTile(x, y)
-						}
-					})
+				if right {
+					if !g.tiles[py][px].open {
+						g.tiles[py][px].marked = true
+						g.updateTile(px, py)
+					}
+				}
+				if left {
+					g.button = buttonEvaluate
+					g.updateButton()
+					g.tiles[py][px].pressed = true
+					g.updateTile(px, py)
+					if g.tiles[py][px].open {
+						g.forEachNeighbour(px, py, func(x, y int) {
+							if !g.tiles[y][x].marked {
+								g.tiles[y][x].pressed = true
+								g.updateTile(x, y)
+							}
+						})
+					}
 				}
 			})
 			icons[y*g.c.width+x].OnRelease(func(left, right, middle, alt, control bool) {
@@ -198,6 +206,8 @@ func (g *game) setHandlers() {
 				}
 				log.Printf("OnEnter (%v,%v)", px, py)
 				if left {
+					g.button = buttonEvaluate
+					g.updateButton()
 					g.tiles[py][px].pressed = true
 					g.updateTile(px, py)
 					if g.tiles[py][px].open {
@@ -218,6 +228,8 @@ func (g *game) setHandlers() {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
+				g.button = buttonPlaying
+				g.updateButton()
 				log.Printf("OnLeave (%v,%v)", px, py)
 				//g.button = buttonPlaying
 				//g.updateButton()
