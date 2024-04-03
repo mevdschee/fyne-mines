@@ -200,6 +200,14 @@ func (g *game) setHandlers() {
 				if left {
 					g.tiles[py][px].pressed = true
 					g.updateTile(px, py)
+					if g.tiles[py][px].open {
+						g.forEachNeighbour(px, py, func(x, y int) {
+							if !g.tiles[y][x].marked {
+								g.tiles[y][x].pressed = true
+								g.updateTile(x, y)
+							}
+						})
+					}
 				}
 				//g.button = buttonPlaying
 				//g.updateButton()
