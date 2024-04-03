@@ -287,7 +287,7 @@ func (g *game) onPressTile(x, y int) {
 		g.updateTimeDigits()
 		g.placeBombs(x, y, g.bombs)
 	}
-	if !g.tiles[y][x].open {
+	if !g.tiles[y][x].open && !g.tiles[y][x].marked {
 		g.tiles[y][x].open = true
 		g.closed--
 		if g.tiles[y][x].bomb {
@@ -304,9 +304,7 @@ func (g *game) onPressTile(x, y int) {
 		}
 		if g.tiles[y][x].number == 0 {
 			g.forEachNeighbour(x, y, func(px, py int) {
-				if !g.tiles[y][x].marked {
-					g.onPressTile(px, py)
-				}
+				g.onPressTile(px, py)
 			})
 		}
 	}
