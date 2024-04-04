@@ -299,6 +299,8 @@ func (g *game) onPressTile(x, y int) {
 			g.state = stateWon
 			g.button = buttonWon
 			g.updateButton()
+			g.bombs = 0
+			g.updateBombDigits()
 			return
 		}
 		if g.tiles[y][x].number == 0 {
@@ -317,9 +319,6 @@ func (g *game) updateButton() {
 func (g *game) updateBombDigits() {
 	bombsDigits := g.getClips("bombs")
 	bombs := g.bombs
-	if g.state == stateWon {
-		bombs = 0
-	}
 	if bombs < -99 {
 		bombs = -99
 	}
@@ -430,12 +429,12 @@ func (g *game) updateTile(x, y int) {
 }
 
 func (g *game) restart() {
+	g.state = stateWaiting
 	g.button = buttonPlaying
 	g.updateButton()
 	g.bombs = g.c.bombs
 	g.updateBombDigits()
 	g.closed = g.c.width * g.c.height
-	g.state = stateWaiting
 	g.time = time.Now().UnixNano()
 	g.updateTimeDigits()
 	g.tiles = make([][]tile, g.c.height)
