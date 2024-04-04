@@ -227,7 +227,6 @@ func (g *game) setHandlers() {
 				if g.state == stateWon || g.state == stateLost {
 					return
 				}
-				log.Printf("OnEnter (%v,%v)", px, py)
 				if left {
 					g.button = buttonEvaluate
 					g.updateButton()
