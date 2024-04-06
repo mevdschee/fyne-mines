@@ -1,4 +1,4 @@
-# fyne-mines
+# Fyne Mines
 
 ![screenshot](screenshot.png)
 
