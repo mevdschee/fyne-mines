@@ -8,7 +8,7 @@ Implementation of minesweeper in Go using the Fyne GUI library.
 
 Install Fyne dependencies:
 
-    sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
+    sudo apt install golang gcc libgl1-mesa-dev xorg-dev
 
 Install go packages:
 
