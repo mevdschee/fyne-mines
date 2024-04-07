@@ -123,6 +123,7 @@ func (g *game) init() {
 	width, height := g.getSize()
 	movie.SetSize(width, height)
 	g.movie = movie
+	clipCache = map[string][]*clips.Clip{}
 }
 
 func (g *game) getClips(clip string) []*clips.Clip {

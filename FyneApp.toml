@@ -5,4 +5,4 @@ Website = "https://tqdev.com"
   Name = "fyne-mines"
   ID = "com.tqdev.fyne-mines"
   Version = "1.0.0"
-  Build = 5
+  Build = 6
