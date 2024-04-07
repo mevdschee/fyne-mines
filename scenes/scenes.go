@@ -37,7 +37,7 @@ func (s *Scene) GetLayers() map[string]*layers.Layer {
 // New creates a new scene
 func New(name string) *Scene {
 	return &Scene{
-		container: container.NewMax(),
+		container: container.NewStack(),
 		name:      name,
 		layers:    map[string]*layers.Layer{},
 		order:     []string{},
@@ -47,7 +47,7 @@ func New(name string) *Scene {
 // FromJSON creates a new scene from JSON
 func FromJSON(spriteMap sprites.SpriteMap, sceneJSON SceneJSON, parameters map[string]interface{}) (*Scene, error) {
 	scene := Scene{
-		container: container.NewMax(),
+		container: container.NewStack(),
 		name:      sceneJSON.Name,
 		layers:    map[string]*layers.Layer{},
 		order:     []string{},

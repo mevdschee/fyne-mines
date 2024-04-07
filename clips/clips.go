@@ -96,7 +96,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 	//blue := color.RGBA{0, 0, 255, 200}
 	//draw.Draw(overlay, overlay.Bounds(), &image.Uniform{blue}, image.Point{0, 0}, draw.Src)
 	clip := &Clip{
-		container: container.NewMax(),
+		container: container.NewStack(),
 		name:      name,
 		x:         x,
 		y:         y,
@@ -157,7 +157,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 	//blue := color.RGBA{0, 0, 255, 200}
 	//draw.Draw(overlay, overlay.Bounds(), &image.Uniform{blue}, image.Point{0, 0}, draw.Src)
 	clip := &Clip{
-		container: container.NewMax(),
+		container: container.NewStack(),
 		name:      name,
 		x:         x,
 		y:         y,

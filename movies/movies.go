@@ -23,7 +23,7 @@ type Movie struct {
 // New creates a new movie
 func New() *Movie {
 	return &Movie{
-		container:    container.NewMax(),
+		container:    container.NewStack(),
 		currentScene: nil,
 		scenes:       map[string]*scenes.Scene{},
 	}
@@ -37,7 +37,7 @@ func FromJSON(spriteMap sprites.SpriteMap, data string, parameters map[string]in
 		return nil, err
 	}
 	movie := Movie{
-		container:    container.NewMax(),
+		container:    container.NewStack(),
 		currentScene: &scenes.Scene{},
 		scenes:       map[string]*scenes.Scene{},
 	}
