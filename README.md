@@ -2,7 +2,7 @@
 
 ![screenshot2](screenshot2.png)
 
-Implementation of minesweeper in Go using the Fyne GUI library.
+Implementation of minesweeper in Go using the [Fyne](https://fyne.io/) GUI library.
 
 ### Building
 
