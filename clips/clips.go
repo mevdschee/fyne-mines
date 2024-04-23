@@ -73,7 +73,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		srcRect := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
 		dstRect := image.Rect(0, 0, srcWidth, srcHeight)
 		dst := image.NewRGBA(dstRect)
-		draw.NearestNeighbor.Scale(dst, dstRect, *sprite.Image, srcRect, draw.Over, nil)
+		draw.Copy(dst, image.Point{}, *sprite.Image, srcRect, draw.Over, nil)
 		frame := canvas.NewImageFromImage(dst)
 		frame.ScaleMode = canvas.ImageScalePixels
 		frames = append(frames, frame)
