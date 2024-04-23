@@ -1,7 +1,6 @@
 package clips
 
 import (
-	"fmt"
 	"image"
 
 	"fyne.io/fyne/v2"
@@ -59,18 +58,6 @@ func (c *Clip) GetSize() fyne.Size {
 	return fyne.Size{Width: float32(c.width * c.scale), Height: float32(c.height * c.scale)}
 }
 
-// cropImage takes an image and crops it to the specified rectangle
-func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
-	type subImager interface {
-		SubImage(r image.Rectangle) image.Image
-	}
-	simg, ok := img.(subImager)
-	if !ok {
-		return nil, fmt.Errorf("image does not support cropping")
-	}
-	return simg.SubImage(crop), nil
-}
-
 // New creates a new sprite based clip
 func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 	frames := []*canvas.Image{}
@@ -84,10 +71,9 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		srcX := sprite.X + (i%grid)*(srcWidth+sprite.Gap)
 		srcY := sprite.Y + (i/grid)*(srcHeight+sprite.Gap)
 		srcRect := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
-		src, _ := cropImage(*sprite.Image, srcRect)
 		dstRect := image.Rect(0, 0, srcWidth, srcHeight)
 		dst := image.NewRGBA(dstRect)
-		draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
+		draw.NearestNeighbor.Scale(dst, dstRect, *sprite.Image, srcRect, draw.Over, nil)
 		frame := canvas.NewImageFromImage(dst)
 		frame.ScaleMode = canvas.ImageScalePixels
 		frames = append(frames, frame)
@@ -141,9 +127,8 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 			}
 
 			srcRect := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
-			src, _ := cropImage(*sprite.Image, srcRect)
 			dstRect := image.Rect(dstX, dstY, dstX+dstWidth, dstY+dstHeight)
-			draw.NearestNeighbor.Scale(dst, dstRect, src, src.Bounds(), draw.Over, nil)
+			draw.NearestNeighbor.Scale(dst, dstRect, *sprite.Image, srcRect, draw.Over, nil)
 
 			srcX += srcWidth + sprite.Gap
 			dstX += dstWidth
