@@ -72,13 +72,13 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 		srcY := sprite.Y + (i/grid)*(srcHeight+sprite.Gap)
 		srcRect := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
 		dstRect := image.Rect(0, 0, srcWidth, srcHeight)
-		dst := image.NewRGBA(dstRect)
+		dst := image.NewNRGBA(dstRect)
 		draw.Copy(dst, image.Point{}, *sprite.Image, srcRect, draw.Over, nil)
 		frame := canvas.NewImageFromImage(dst)
 		frame.ScaleMode = canvas.ImageScalePixels
 		frames = append(frames, frame)
 	}
-	overlay := image.NewRGBA(frames[0].Image.Bounds())
+	overlay := image.NewNRGBA(frames[0].Image.Bounds())
 	//blue := color.RGBA{0, 0, 255, 200}
 	//draw.Draw(overlay, overlay.Bounds(), &image.Uniform{blue}, image.Point{0, 0}, draw.Src)
 	clip := &Clip{
@@ -107,7 +107,7 @@ func New(sprite *sprites.Sprite, name string, x, y, scale int) *Clip {
 
 // NewScaled creates a new 9 slice scaled sprite based clip
 func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale int) *Clip {
-	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+	dst := image.NewNRGBA(image.Rect(0, 0, width, height))
 
 	srcY := sprite.Y
 	dstY := 0
@@ -138,7 +138,7 @@ func NewScaled(sprite *sprites.Sprite, name string, x, y, width, height, scale i
 	}
 	frame0 := canvas.NewImageFromImage(dst)
 	frame0.ScaleMode = canvas.ImageScalePixels
-	overlay := image.NewRGBA(frame0.Image.Bounds())
+	overlay := image.NewNRGBA(frame0.Image.Bounds())
 	//blue := color.RGBA{0, 0, 255, 200}
 	//draw.Draw(overlay, overlay.Bounds(), &image.Uniform{blue}, image.Point{0, 0}, draw.Src)
 	clip := &Clip{

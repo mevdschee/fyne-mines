@@ -59,7 +59,7 @@ func (m *Movie) GetContainer() *fyne.Container {
 // SetSize set the size of the movie
 func (m *Movie) SetSize(width, height int) {
 	c := m.GetContainer()
-	i := canvas.NewImageFromImage(image.NewRGBA(image.Rect(0, 0, 0, 0)))
+	i := canvas.NewImageFromImage(image.NewNRGBA(image.Rect(0, 0, 0, 0)))
 	i.SetMinSize(fyne.NewSize(float32(width), float32(height)))
 	c.Add(i)
 }
