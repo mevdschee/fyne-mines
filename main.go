@@ -514,7 +514,7 @@ func main() {
 	})
 	menuGame := fyne.NewMenu("Game ", menuItemBeginner, menuItemIntermediate, menuItemExpert)
 	menuItemAbout := fyne.NewMenuItem("About...", func() {
-		dialog.ShowInformation("About Fyne Mines v0.0.1", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
+		dialog.ShowInformation("About Fyne Mines v1.1.0", "Author: Maurits van der Schee\n\ngithub.com/mevdschee/fyne-mines", w)
 	})
 	menuHelp := fyne.NewMenu("Help ", menuItemAbout)
 	mainMenu := fyne.NewMainMenu(menuGame, menuHelp)

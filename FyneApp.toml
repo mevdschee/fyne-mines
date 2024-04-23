@@ -4,5 +4,5 @@ Website = "https://tqdev.com"
   Icon = "Icon.png"
   Name = "fyne-mines"
   ID = "com.tqdev.fyne-mines"
-  Version = "1.0.0"
-  Build = 6
+  Version = "1.1.0"
+  Build = 12
