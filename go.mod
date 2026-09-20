@@ -39,3 +39,5 @@ require (
 	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/go-gl/glfw/v3.3/glfw => ./third_party/glfw

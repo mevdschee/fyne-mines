@@ -66,6 +66,23 @@ The resulting app is unsigned, so macOS refuses to open it on first launch. Use
 the Open entry in the right click menu, or drop the quarantine flag with
 `xattr -dr com.apple.quarantine fyne-mines.app`.
 
+### Running without a GPU on OSX
+
+macOS refuses to create an OpenGL context on a host without a GPU, such as a
+virtual machine, and the app exits with:
+
+    FormatUnavailable: NSGL: Failed to find suitable pixel format
+
+Start it with `GLFW_SOFTWARE_RENDERER` set to fall back to Apple's CPU
+renderer, which is slower but does not need a GPU:
+
+    GLFW_SOFTWARE_RENDERER=1 fyne-mines.app/Contents/MacOS/fyne-mines
+
+Run the executable directly like that, because `open` does not pass the
+environment on to the app it launches.
+
+This needs the patched glfw in third_party, see the README there.
+
 ### Releasing
 
 Bump `Version` in FyneApp.toml, commit and push, then run the release.sh
