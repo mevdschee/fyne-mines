@@ -5,7 +5,7 @@ Icon = "Icon.png"
 Name = "fyne-mines"
 ID = "com.tqdev.fyne-mines"
 Version = "1.1.6"
-Build = 75
+Build = 76
 
 [LinuxAndBSD]
 Categories = ["Game"]
