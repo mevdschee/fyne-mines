@@ -75,6 +75,16 @@ defaults to the tag, pass one as the first argument to override it:
 
     ./release.sh "Update dependencies"
 
+### Known issues
+
+On Windows without OpenGL, such as a virtual machine or a Remote Desktop
+session, the app does not start:
+
+    Fyne error: window creation error
+    Cause:APIUnavailable: WGL: The driver does not appear to support OpenGL
+
+Installing [Mesa3D](https://github.com/pal1000/mesa-dist-win/releases) fixes it.
+
 ### Graphics and rules
 
 "[Minesweeper X](https://www.curtisbright.com/msx/)" by Curtis Bright is IMHO
