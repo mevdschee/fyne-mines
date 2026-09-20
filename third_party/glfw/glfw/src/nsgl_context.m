@@ -29,6 +29,7 @@
 #include "internal.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <OpenGL/CGLRenderers.h>
 #include <math.h>
@@ -208,14 +209,11 @@ GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
 
     // Apple's CPU renderer is not accelerated, so asking for
     // NSOpenGLPFAAccelerated rules it out and leaves no usable pixel format on
-    // a host without a GPU, such as a virtual machine. Allow it to be picked.
-    if (getenv("GLFW_SOFTWARE_RENDERER"))
-    {
-        addAttrib(NSOpenGLPFARendererID);
-        addAttrib(kCGLRendererGenericFloatID);
-    }
-    else
-        addAttrib(NSOpenGLPFAAccelerated);
+    // a host without a GPU, such as a virtual machine. Remember where that
+    // constraint sits so it can be swapped for the CPU renderer further down.
+    const int rendererIndex = index;
+    const GLFWbool forceSoftware = getenv("GLFW_SOFTWARE_RENDERER") != NULL;
+    addAttrib(NSOpenGLPFAAccelerated);
     addAttrib(NSOpenGLPFAClosestPolicy);
 
     if (ctxconfig->nsgl.offline)
@@ -320,8 +318,30 @@ GLFWbool _glfwCreateContextNSGL(_GLFWwindow* window,
 #undef addAttrib
 #undef setAttrib
 
-    window->context.nsgl.pixelFormat =
-        [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
+    window->context.nsgl.pixelFormat = nil;
+    if (!forceSoftware)
+    {
+        window->context.nsgl.pixelFormat =
+            [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
+    }
+
+    if (window->context.nsgl.pixelFormat == nil)
+    {
+        // Nothing accelerated is available, which is what a host without a GPU
+        // looks like. Widen the search to Apple's CPU renderer by replacing the
+        // NSOpenGLPFAAccelerated token with an explicit renderer id, which
+        // needs one more slot, and try once more before giving up.
+        assert((size_t) index + 1 <= sizeof(attribs) / sizeof(attribs[0]));
+        memmove(&attribs[rendererIndex + 2], &attribs[rendererIndex + 1],
+                (index - rendererIndex - 1) * sizeof(attribs[0]));
+        attribs[rendererIndex] = NSOpenGLPFARendererID;
+        attribs[rendererIndex + 1] = kCGLRendererGenericFloatID;
+        index++;
+
+        window->context.nsgl.pixelFormat =
+            [[NSOpenGLPixelFormat alloc] initWithAttributes:attribs];
+    }
+
     if (window->context.nsgl.pixelFormat == nil)
     {
         _glfwInputError(GLFW_FORMAT_UNAVAILABLE,
