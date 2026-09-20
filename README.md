@@ -66,35 +66,12 @@ The resulting app is unsigned, so macOS refuses to open it on first launch. Use
 the Open entry in the right click menu, or drop the quarantine flag with
 `xattr -dr com.apple.quarantine fyne-mines.app`.
 
-### Running without a GPU on OSX
-
-macOS has no accelerated OpenGL renderer on a host without a GPU, such as a
-virtual machine, and glfw only ever asks for an accelerated one, so the app
-used to exit with:
-
-    FormatUnavailable: NSGL: Failed to find suitable pixel format
-
-The patched glfw in third_party notices that no accelerated pixel format could
-be created and retries with Apple's CPU renderer, so this now works on its own,
-including when the app is opened from Finder. Rendering falls back to the CPU
-and is slower, but the game is playable.
-
-Set `GLFW_SOFTWARE_RENDERER` to skip the accelerated attempt and go straight to
-the CPU renderer, which is useful to check the fallback on a machine that does
-have a GPU:
-
-    GLFW_SOFTWARE_RENDERER=1 fyne-mines.app/Contents/MacOS/fyne-mines
-
-Run the executable directly for that, because `open` does not pass the
-environment on to the app it launches.
-
 ### Releasing
 
-Bump `Version` in FyneApp.toml, commit and push, then run the release.sh
-script. It reads the version, tags the current commit and uploads the six
-binaries from fyne-cross/dist as a GitHub release, so run package.sh first.
-The release title defaults to the tag, pass one as the first argument to
-override it:
+Bump `Version` in FyneApp.toml, commit and push, then run the release.sh script.
+It reads the version, tags the current commit and uploads the six binaries from
+fyne-cross/dist as a GitHub release, so run package.sh first. The release title
+defaults to the tag, pass one as the first argument to override it:
 
     ./release.sh "Update dependencies"
 
