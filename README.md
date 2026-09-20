@@ -1,6 +1,6 @@
 # Fyne Mines
 
-![screenshot2](screenshot2.png)
+![screenshot1](screenshot1.png) ![screenshot3](screenshot3.png)
 
 Implementation of minesweeper in Go using the [Fyne](https://fyne.io/) GUI
 library.
