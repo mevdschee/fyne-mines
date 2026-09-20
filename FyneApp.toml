@@ -4,7 +4,7 @@ Website = "https://tqdev.com"
   Icon = "Icon.png"
   Name = "fyne-mines"
   ID = "com.tqdev.fyne-mines"
-  Version = "1.1.4"
+  Version = "1.1.5"
   Build = 63
 
 [LinuxAndBSD]
