@@ -4,8 +4,8 @@ Website = "https://tqdev.com"
 Icon = "Icon.png"
 Name = "fyne-mines"
 ID = "com.tqdev.fyne-mines"
-Version = "1.1.6"
-Build = 76
+Version = "1.1.7"
+Build = 82
 
 [LinuxAndBSD]
 Categories = ["Game"]
